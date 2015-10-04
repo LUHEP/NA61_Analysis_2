@@ -1,0 +1,16 @@
+.idea/
+*.rar
+*.vcxproj
+*.filters
+*.txt
+*.root
+tmp.cpp
+scripts
+results
+code_from_Tobiasz
+file_lists
+tmp
+LRC_pile
+Debug
+cutFiles
+files
