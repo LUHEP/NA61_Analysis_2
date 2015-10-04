@@ -3,7 +3,6 @@
 *.vcxproj
 *.filters
 *.txt
-*.root
 tmp.cpp
 scripts
 results
