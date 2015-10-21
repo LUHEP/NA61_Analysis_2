@@ -976,7 +976,7 @@ bool AcceptCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
 	P=vtxMomentum.GetMag();
     phi	=	TMath::ATan2(Py,Px);
     Pt=sqrt(Px*Px+Py*Py);
-    eta=-TMath::Log(Pt/(P+Pz));
+    eta=-0.5*TMath::Log((P-Pz)/(P+Pz));
     double_t a,b,c;
 	a = 1 + floor((phi - myXAxLowEdge) / myXAxBinWidth);
 	b = 1 + floor((Pt - myYAxLowEdge) / myYAxBinWidth);
@@ -1007,7 +1007,7 @@ bool AcceptCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxT
 	P=vtxMomentum.GetMag();
     phi	=	TMath::ATan2(Py,Px);
     Pt=sqrt(Px*Px+Py*Py);
-    eta=-TMath::Log(Pt/(P+Pz));
+    eta=-0.5*TMath::Log((P-Pz)/(P+Pz));
     double_t a,b,c;
 	a = 1 + floor((phi - myXAxLowEdge) / myXAxBinWidth);
 	b = 1 + floor((Pt - myYAxLowEdge) / myYAxBinWidth);
@@ -1046,7 +1046,7 @@ bool EtaCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
 	Pt=sqrt(Px*Px+Py*Py);
 	P =vtxMomentum.GetMag();
 	Pz=vtxMomentum.GetZ();
-	Eta=-TMath::Log(Pt/(P+Pz));
+	Eta=-0.5*TMath::Log((P-Pz)/(P+Pz));
 	if (Eta > myMaxEta || Eta < myMinEta) return 0;
 	myNEntries++;
 	return 1;
@@ -1062,7 +1062,7 @@ bool EtaCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrac
 	Pt=sqrt(Px*Px+Py*Py);
 	P =vtxMomentum.GetMag();
 	Pz=vtxMomentum.GetZ();
-	Eta=-TMath::Log(Pt/(P+Pz));
+	Eta=-0.5*TMath::Log((P-Pz)/(P+Pz));;
 	if (Eta > myMaxEta || Eta < myMinEta) return 0;
 	myNEntries++;
 	return 1;
@@ -1272,7 +1272,7 @@ AcceptRapidityCut::~AcceptRapidityCut()
 bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
 {
 	//	cout<<"AcceptRapidity"<<endl;
-	double_t Px, Py, Pz, P2, Pt, eta, phi, rapidity, E, phi_reflected;
+	double_t Px, Py, Pz, P2, Pt, phi, rapidity, E, phi_reflected;
 	double mass = 0.1396;
 	int charge;
 	Vector vtxMomentum = vtxTrack.GetMomentum();
@@ -1283,7 +1283,6 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 	phi = TMath::ATan2(Py, Px); //[-pi;pi]
 	phi = 180 * phi / TMath::Pi(); //[-180;180]
 	Pt = sqrt(Px*Px + Py*Py);
-	//	eta = -TMath::Log(Pt / (P + Pz));
 	E = sqrt(pow(mass, 2) + P2);
 
 	rapidity = 0.5 * log((E + Pz) / (E - Pz)) - beamRapidity / 2;
@@ -1317,7 +1316,7 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
 {
 	//	cout<<"AcceptRapidity"<<endl;
-	double_t Px, Py, Pz, P2, Pt, eta, phi, rapidity, E, phi_reflected;
+	double_t Px, Py, Pz, P2, Pt, phi, rapidity, E, phi_reflected;
 	double mass = 0.1396;
 	int charge;
 	Vector vtxMomentum = vtxTrack.GetMomentum();
@@ -1328,7 +1327,6 @@ bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTra
 	phi = TMath::ATan2(Py, Px); //[-pi;pi]
 	phi = 180 * phi / TMath::Pi(); //[-180;180]
 	Pt = sqrt(Px*Px + Py*Py);
-	//	eta = -TMath::Log(Pt / (P + Pz));
 	E = sqrt(pow(mass, 2) + P2);
 	rapidity = 0.5 * log((E + Pz) / (E - Pz)) - beamRapidity/2;
 	charge = vtxTrack.GetCharge();

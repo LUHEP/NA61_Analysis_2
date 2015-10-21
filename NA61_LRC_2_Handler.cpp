@@ -268,7 +268,7 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 
 
 	pT = sqrt(pX*pX + pY*pY);
-	eta = -TMath::Log(pT / (p + pZ));
+	eta = -0.5*TMath::Log((p-pZ)/(p+pZ));
 
 	dEdx = 0;
 
@@ -367,7 +367,7 @@ void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 
     
 	pT	=	sqrt(pX*pX+pY*pY);	
-	eta=-TMath::Log(pT/(p+pZ));
+	eta=-0.5*TMath::Log((p-pZ)/(p+pZ));
     
     dEdx = 0;
 
@@ -1748,7 +1748,7 @@ void AcceptanceHandler::PutTrack(const evt::sim::VertexTrack& vtxTrackSim, Event
 	phi = TMath::ATan2(pY, pX); //phi = [-pi;pi] 
 	
 	pT = sqrt(pX*pX + pY*pY);
-	eta = -TMath::Log(pT / (p + pZ));
+	eta = -0.5*TMath::Log((p-pZ)/(p+pZ));
 
 	evt::Index<rec::Track> recTrack = vtxTrackSim->GetRecTrackWithMaxCommonPoints();//FIXME
 }*/
@@ -1919,7 +1919,7 @@ void TimeHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	double E = sqrt(pow(mass, 2) + p*p);
 
 	pT = sqrt(pX*pX + pY*pY);
-	eta = -TMath::Log(pT / (p + pZ));
+	eta = -0.5*TMath::Log((p-pZ)/(p+pZ));
 
 	dEdx = 0;
 
