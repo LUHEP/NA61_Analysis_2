@@ -398,9 +398,9 @@ private:
 	TH3F* myAcceptHist;
 
 
-	double_t myXAxLowEdge, myYAxLowEdge, myZAxLowEdge;
-	double_t myXAxBinWidth, myYAxBinWidth, myZAxBinWidth;
-	unsigned int myNXBins, myNYBins, myNZBins;
+	double myXAxLowEdge, myYAxLowEdge, myZAxLowEdge;
+	double myXAxBinWidth, myYAxBinWidth, myZAxBinWidth;
+	double myNXBins, myNYBins, myNZBins;
 };
 
 

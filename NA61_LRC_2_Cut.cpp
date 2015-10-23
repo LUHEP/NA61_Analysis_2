@@ -1248,13 +1248,13 @@ AcceptRapidityCut::AcceptRapidityCut()
 	TH3F* AcceptHist = (TH3F*)in_file->GetObjectChecked(nameHist, "TH3F");
 	myAcceptHist = (TH3F*)AcceptHist->Clone("myAccCopy");
 
-	myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(1);
-	myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(1);
-	myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(1);
+	myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(2);
+	myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(2);
+	myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(2);
 
-	myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(1);
-	myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(1);
-	myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(1);
+	myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(2);
+	myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(2);
+	myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(2);
 
 	myNXBins = myAcceptHist->GetXaxis()->GetNbins() + 1;
 	myNYBins = myAcceptHist->GetYaxis()->GetNbins() + 1;
@@ -1273,9 +1273,9 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 {
 	//	cout<<"AcceptRapidity"<<endl;
 	double_t Px, Py, Pz, P2, Pt, phi, rapidity, E, phi_reflected;
-	double mass = 0.1396;
+	const double mass = 0.1396;
 	int charge;
-	Vector vtxMomentum = vtxTrack.GetMomentum();
+	const Vector vtxMomentum = vtxTrack.GetMomentum();
 	Px = vtxMomentum.GetX();
 	Py = vtxMomentum.GetY();
 	Pz = vtxMomentum.GetZ();
@@ -1291,7 +1291,9 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 	if (charge < 0) {
 		if (phi < 0) phi_reflected = -180 - phi;
 		else phi_reflected = 180 - phi;
-	}
+	}else
+		phi_reflected = phi;
+
 
 	double_t a, b, c;
 	a = 1 + floor((rapidity - myXAxLowEdge) / myXAxBinWidth);
@@ -1311,6 +1313,7 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 	}
 	else
 		return 0;
+
 }
 
 bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
@@ -1334,7 +1337,7 @@ bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTra
 	if (charge < 0) {
 		if (phi < 0) phi_reflected = -180 - phi;
 		else phi_reflected = 180 - phi;
-	}
+	} else phi_reflected = phi;
 
 	double_t a, b, c;
 	a = 1 + floor((rapidity - myXAxLowEdge) / myXAxBinWidth);
