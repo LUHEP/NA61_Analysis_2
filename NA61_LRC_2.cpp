@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 4; 
+	const int N0 = 1;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -138,15 +138,8 @@ int main(int argc, char* argv[])
 		name = nameBasic + name2;
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
 		arOneWindHandler[i]->AddStandardCutsRaw();
+		arOneWindHandler[i]->AddRunNumberCut(20445,20500);
 		//arOneWindHandler[i]->AddPSDEnergyCut(0, 1850);
-		arOneWindHandler[i]->AddDirectBPDCut(-0.45, -0.12, -0.1, 0.6, BPD1);
-		arOneWindHandler[i]->AddDirectBPDCut(-0.15, 0.15, -0.37, -0.01, BPD3);
-		if (i >= 1)
-			arOneWindHandler[i]->AddPSDEnergyCut(2370, e16Central);
-		if (i >= 2)
-			arOneWindHandler[i]->AddPSDEnergyCut(800, 5000, e28Periferal);
-		if (i >= 3)
-			arOneWindHandler[i]->AddS5Cut(80);
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
@@ -223,7 +216,8 @@ int main(int argc, char* argv[])
 		arTime[i] = new TimeHandler(name + "Raw.root", false);
 		arTime[i]->AddStandardCutsRaw();
 //		arTime[i]->AddPSDCloudsCut();
-//		arTime[i]->AddPSDEnergyCut(0, 2400);
+        if (i==1)
+    		arTime[i]->AddPSDEnergyCut(0, 2400, e28Central);
 		HandList->AddHandler(arTime[i]);
 	}
 
@@ -313,7 +307,7 @@ void BaseHandler::AddStandardCutsRaw()
 	this->Raw();
 	this->AddT2Cut();
 	if (systemType == ArSc)
-		this->AddWFACut(-100, -200, 4);
+		this->AddWFACut(-100, -200, 25);
 	else 
 		this->AddWFACut(-100, -200, 1);
 //	this->AddChargeCut();
@@ -321,8 +315,14 @@ void BaseHandler::AddStandardCutsRaw()
 	this->AddFittedVtxCut();
 	this->AddFitQualityCut();
 	if (systemType == ArSc){
-		if (beamMomentum == 150)
+		if (beamMomentum == 150) {
+			this->AddDirectBPDCut(-0.45, -0.12, -0.1, 0.6, BPD1);
+			this->AddDirectBPDCut(-0.15, 0.15, -0.37, -0.01, BPD3);
 			this->AddZVtxCut(-589.7, -569.7);
+			this->AddPSDEnergyCut(2370, e16Central);
+			this->AddPSDEnergyCut(800, 5000, e28Periferal);
+			this->AddS5Cut(80);
+		}
 		if (beamMomentum == 13)
 			this->AddZVtxCut(-590, -570);
 		if (beamMomentum == 19)
@@ -349,7 +349,7 @@ void BaseHandler::AddStandardCutsRaw()
 	this->AddImpactPointCut(4, 2);
 	this->AddPtCut(0, 1.5);
 	if (beamMomentum != 13){
-//		this->AddAcceptRapidityCut();
+		this->AddAcceptRapidityCut();
 		if (systemType != ArSc)
 			this->AddEECut();
 	}

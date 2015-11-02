@@ -129,6 +129,7 @@ public:
 	void AddPSDCloudsCut();
 	void AddPSDCloudsCut(ePSDNClouds eCloudType);
 	void AddS5Cut(double upLimit);
+	void AddRunNumberCut(int lowLimit, int upLimit);
 
 	void AddVtxTrackStatusCut();
 	void AddImpactPointCut();

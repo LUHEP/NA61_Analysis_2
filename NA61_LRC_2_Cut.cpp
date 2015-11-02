@@ -1745,3 +1745,32 @@ TString S5Cut::GetShortNameWithPar()
 	name = my_Short_Name + name2;
 	return name;
 }
+
+RunNumberCut::RunNumberCut(int lowLimit, int upLimit, bool bRaw)
+{
+	my_Name = "RunNumber";
+	my_Short_Name = "RunN";
+	myLowLim = lowLimit;
+	myUpLim = upLimit;
+	myBRaw = bRaw;
+}
+
+bool RunNumberCut::CheckEvent(Event &event, bool bSim)
+{
+	if (myBRaw = false)
+		return true;//notrhing to do
+	int myRunNumber = event.GetEventHeader().GetRunNumber();
+	if ((myRunNumber > myUpLim) || (myRunNumber < myLowLim))
+		return false;
+	myNEntries++;
+	return true;
+}
+
+TString RunNumberCut::GetShortNameWithPar()
+{
+	TString name;
+	char name2[50];
+	sprintf(name2, "_%i_%i", myLowLim, myUpLim);
+	name = my_Short_Name + name2;
+	return name;
+}

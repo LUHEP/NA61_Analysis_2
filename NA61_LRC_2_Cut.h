@@ -487,7 +487,7 @@ private:
 	PSDEnergyCut();
 	double myMinEPSD;
 	double myMaxEPSD;
-	double myBRaw;
+	bool myBRaw;
 	ePSDModulCombinations myPSDModSet;
 	bool myPSDModArray[45];
 };
@@ -504,4 +504,20 @@ private:
 	S5Cut();
 	double myUpLimit;
 	bool myBRaw;
+};
+
+//Run number cut, for example if you want to analyse a special set of runs
+class RunNumberCut : public EventCut
+{
+public:
+    RunNumberCut(int lowLimit, int upLimit, bool bRaw);
+    ~RunNumberCut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    RunNumberCut();
+    int myLowLim;
+    int myUpLim;
+    bool myBRaw;
 };

@@ -1114,6 +1114,11 @@ void BaseHandler::AddS5Cut(double upLimit)
 	myEventCutList->AddCut(A);
 }
 
+void BaseHandler::AddRunNumberCut(int lowLimit, int upLimit)
+{
+	Cut* A = new RunNumberCut(lowLimit,upLimit,bRaw);
+	myEventCutList->AddCut(A);
+}
 
 
 
