@@ -67,6 +67,8 @@ public:
 	void DissectEvent(Event &event);	
 	
 	double_t myFitVtxZ;
+	double_t myFitVtxX;
+	double_t myFitVtxY;
 	double_t myBPD[6];
 	double_t myEnergyPSD;
     vector<double> myTimeStructureWFA; //Ya pomenyal
@@ -378,14 +380,7 @@ private:
 	// --- list of hists
 	TH2D*	psdEnergyHist;
 	TH2D	*chargeHist,	*multHist,
-//   all charges	  neg		 pos
-		*pHist,		*pHist0,	*pHist1,
-		*pxHist,	*pxHist0,	*pxHist1,
-		*pyHist,	*pyHist0,	*pyHist1,
-		*pzHist,	*pzHist0,	*pzHist1,
-		*ptHist,	*ptHist0,	*ptHist1,
-		*etaHist,	*etaHist0,	*etaHist1,
-		*phiHist,	*phiHist0,	*phiHist1;
+		*pHist, *ptHist,	*phiHist;
     
-    TH2D  *fitVtxHist;
+    TH2D  *fitVtxHistX, *fitVtxHistY, *fitVtxHistZ;
 };

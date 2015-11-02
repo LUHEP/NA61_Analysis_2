@@ -1185,6 +1185,8 @@ void LRCHandler::AddPtBackward(double_t minPt, double_t maxPt)
 void StatEventInfo::Reset()
 {
 	if (myReset == false){
+        myFitVtxX = 0;
+        myFitVtxY = 0;
 		myFitVtxZ = 0;
 		for (int i = 0; i<6; i++) 
 			myBPD[i] = 0;
@@ -1219,6 +1221,9 @@ void StatEventInfo::DissectEvent(Event &event)
 		//const utl::Point& Vertex = pMainVertex->GetPosition();
 		const utl::Point& Vertex = pPrimaryVertex->GetPosition();
 		myFitVtxZ = Vertex.GetZ();
+        myFitVtxX = Vertex.GetX();
+        myFitVtxY = Vertex.GetY();
+
         
         
         const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger(); //Ya pomenyal
@@ -1789,15 +1794,13 @@ TimeHandler::~TimeHandler()
 	multHist->Write();
 	psdEnergyHist->Write();
 
-	pHist->Write();			pHist0->Write();			pHist1->Write();
-	pxHist->Write();		pxHist0->Write();			pxHist1->Write();
-	pyHist->Write();		pyHist0->Write();			pyHist1->Write();
-	pzHist->Write();		pzHist0->Write();			pzHist1->Write();
-	ptHist->Write();		ptHist0->Write();			ptHist1->Write();
-	etaHist->Write();		etaHist0->Write();			etaHist1->Write();
-	phiHist->Write();		phiHist0->Write();			phiHist1->Write();
+	pHist->Write();
+	ptHist->Write();
+	phiHist->Write();
 
-	fitVtxHist->Write();
+	fitVtxHistX->Write();
+	fitVtxHistY->Write();
+	fitVtxHistZ->Write();
 
 	cout << nameOutFile << endl;
 	cout << "nEvent:  " << multHist->GetEntries() << endl;
@@ -1806,49 +1809,47 @@ TimeHandler::~TimeHandler()
 	outputFile.Close();
 }
 
-void TimeHandler::Init()
-{
+void TimeHandler::Init() {
 	cout << "init" << endl;
 	double minBound, maxBound, nBinsRunNumber;
-	switch (systemType)
-	{
-	case ArSc:
-		if (beamMomentum == 13){
-			minBound = minRunNumberArSc13 - 0.5;
-			maxBound = maxRunNumberArSc13 + 0.5;
-			nBinsRunNumber = maxBound - minBound;
-			break;
-		}
-		if (beamMomentum == 19){
-			minBound = minRunNumberArSc19 - 0.5;
-			maxBound = maxRunNumberArSc19 + 0.5;
-			nBinsRunNumber = maxBound - minBound;
-			break;
-		}
-		if (beamMomentum == 30){
-			minBound = minRunNumberArSc30 - 0.5;
-			maxBound = maxRunNumberArSc30 + 0.5;
-			nBinsRunNumber = maxBound - minBound;
-			break;
-		}
-		if (beamMomentum == 150){
-			minBound = minRunNumberArSc150 - 0.5;
-			maxBound = maxRunNumberArSc150 + 0.5;
-			nBinsRunNumber = maxBound - minBound;
-			break;
-		}
-		if (beamMomentum == 40){
-			minBound = minRunNumberArSc40 - 0.5;
-			maxBound = maxRunNumberArSc40 + 0.5;
-			nBinsRunNumber = maxBound - minBound;
-			break;
-		}
+	switch (systemType) {
+		case ArSc:
+			if (beamMomentum == 13) {
+				minBound = minRunNumberArSc13 - 0.5;
+				maxBound = maxRunNumberArSc13 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
+			if (beamMomentum == 19) {
+				minBound = minRunNumberArSc19 - 0.5;
+				maxBound = maxRunNumberArSc19 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
+			if (beamMomentum == 30) {
+				minBound = minRunNumberArSc30 - 0.5;
+				maxBound = maxRunNumberArSc30 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
+			if (beamMomentum == 150) {
+				minBound = minRunNumberArSc150 - 0.5;
+				maxBound = maxRunNumberArSc150 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
+			if (beamMomentum == 40) {
+				minBound = minRunNumberArSc40 - 0.5;
+				maxBound = maxRunNumberArSc40 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
 
-	default:
-		minBound = -0.5;
-		maxBound = 21000.5;
-		nBinsRunNumber = maxBound - minBound;
-		break;
+		default:
+			minBound = -0.5;
+			maxBound = 21000.5;
+			nBinsRunNumber = maxBound - minBound;
+			break;
 	}
 	init = true;
 	nTracks1 = 0;
@@ -1860,41 +1861,30 @@ void TimeHandler::Init()
 	TString name = "Time_" + myEventCutList->GetName() + myTrackCutList->GetName() + string1;
 	myNameHist = name;
 
-	psdEnergyHist = new TH2D("PSDHist_" + name, "PSD energy distribution" + name + ";runNumber;PSD(28);entries", nBinsRunNumber, minBound, maxBound, 500, 0, 8500);
+	psdEnergyHist = new TH2D("PSDHist_" + name, "PSD energy distribution" + name + ";runNumber;PSD(28);entries",
+							 nBinsRunNumber, minBound, maxBound, 500, 0, 8500);
 
-	chargeHist = new TH2D("chargeHist_" + name, "chargeHist_" + name + ";runNumber;charge;entries", nBinsRunNumber, minBound, maxBound, 5, -2.5, 2.5);
-	multHist = new TH2D("multHist_" + name, "multHist_" + name + ";runNumber;nTracks;entries", nBinsRunNumber, minBound, maxBound, 301, -0.5, 300.5);
+	chargeHist = new TH2D("chargeHist_" + name, "chargeHist_" + name + ";runNumber;charge;entries", nBinsRunNumber,
+						  minBound, maxBound, 5, -2.5, 2.5);
+	multHist = new TH2D("multHist_" + name, "multHist_" + name + ";runNumber;nTracks;entries", nBinsRunNumber, minBound,
+						maxBound, 301, -0.5, 300.5);
 
 
-	fitVtxHist = new TH2D("Fitted_Vtx_Position_" + name, "fitVtx_" + name + ";runNumber;z [cm]; entries", nBinsRunNumber, minBound, maxBound, 7001, -700, 0);
+	fitVtxHistZ = new TH2D("Fitted_Vtx_Position_Z_" + name, "fitVtxZ_" + name + ";runNumber;z [cm]; entries",
+						   nBinsRunNumber, minBound, maxBound, 7001, -700, 0);
+    fitVtxHistX = new TH2D("Fitted_Vtx_Position_X_" + name, "fitVtxX_" + name + ";runNumber;x [cm]; entries",
+                           nBinsRunNumber, minBound, maxBound, 1001, -10, 10);
+    fitVtxHistY = new TH2D("Fitted_Vtx_Position_Y_" + name, "fitVtxY_" + name + ";runNumber;y [cm]; entries",
+                           nBinsRunNumber, minBound, maxBound, 1001, -10, 10);
 
-	pHist = new TH2D("pHist_" + name, "pHist_" + name + ";runNumber;p;entries", nBinsRunNumber, minBound, maxBound, 301, -1, 150);
-	pHist0 = new TH2D("pHist0_" + name, "pHist0_" + name + ";runNumber;p;entries (-)", nBinsRunNumber, minBound, maxBound, 301, -1, 150);	pHist0->SetLineColor(kBlue);
-	pHist1 = new TH2D("pHist1_" + name, "pHist1_" + name + ";runNumber;p;entries (+)", nBinsRunNumber, minBound, maxBound, 301, -1, 150);	pHist1->SetLineColor(kRed);
+	pHist = new TH2D("pHist_" + name, "pHist_" + name + ";runNumber;p;entries", nBinsRunNumber, minBound, maxBound, 301,
+					 -1, 150);
 
-	pxHist = new TH2D("pxHist_" + name, "pxHist_" + name + ";runNumber;px;entries", nBinsRunNumber, minBound, maxBound, 201, -2, 2);
-	pxHist0 = new TH2D("pxHist0_" + name, "pxHist0_" + name + ";runNumber;px;entries (-)", nBinsRunNumber, minBound, maxBound, 201, -2, 2);		pxHist0->SetLineColor(kBlue);
-	pxHist1 = new TH2D("pxHist1_" + name, "pxHist1_" + name + ";runNumber;px;entries (+)", nBinsRunNumber, minBound, maxBound, 201, -2, 2);		pxHist1->SetLineColor(kRed);
+	ptHist = new TH2D("ptHist_" + name, "ptHist_" + name + ";runNumber;pt;entries ", nBinsRunNumber, minBound, maxBound,
+					  301, 0, 2);
 
-	pyHist = new TH2D("pyHist_" + name, "pyHist_" + name + ";runNumber;py;entries", nBinsRunNumber, minBound, maxBound, 201, -2, 2);
-	pyHist0 = new TH2D("pyHist0_" + name, "pyHist0_" + name + ";runNumber;py;entries (-)", nBinsRunNumber, minBound, maxBound, 201, -2, 2);		pyHist0->SetLineColor(kBlue);
-	pyHist1 = new TH2D("pyHist1_" + name, "pyHist1_" + name + ";runNumber;py;entries (+)", nBinsRunNumber, minBound, maxBound, 201, -2, 2);		pyHist1->SetLineColor(kRed);
-
-	pzHist = new TH2D("pzHist_" + name, "pzHist_" + name + ";runNumber;pz;entries", nBinsRunNumber, minBound, maxBound, 301, -1, 150);
-	pzHist0 = new TH2D("pzHist0_" + name, "pzHist0_" + name + ";runNumber;pz;entries (-)", nBinsRunNumber, minBound, maxBound, 301, -1, 150);	pzHist0->SetLineColor(kBlue);
-	pzHist1 = new TH2D("pzHist1_" + name, "pzHist1_" + name + ";runNumber;pz;entries (+)", nBinsRunNumber, minBound, maxBound, 301, -1, 150);	pzHist1->SetLineColor(kRed);
-
-	ptHist = new TH2D("ptHist_" + name, "ptHist_" + name + ";runNumber;pt;entries ", nBinsRunNumber, minBound, maxBound, 301, 0, 2);
-	ptHist0 = new TH2D("ptHist0_" + name, "ptHist0_" + name + ";runNumber;pt;entries (-)", nBinsRunNumber, minBound, maxBound, 301, 0, 2);		ptHist0->SetLineColor(kBlue);
-	ptHist1 = new TH2D("ptHist1_" + name, "ptHist1_" + name + ";runNumber;pt;entries (+)", nBinsRunNumber, minBound, maxBound, 301, 0, 2);		ptHist1->SetLineColor(kRed);
-
-	etaHist = new TH2D("etaHist_" + name, "etaHist_" + name + ";runNumber;etaLab;entries", nBinsRunNumber, minBound, maxBound, 201, 0, 10);
-	etaHist0 = new TH2D("etaHist0_" + name, "etaHist0_" + name + ";runNumber;etaLab;entries (-)", nBinsRunNumber, minBound, maxBound, 201, 0, 10);	etaHist0->SetLineColor(kBlue);
-	etaHist1 = new TH2D("etaHist1_" + name, "etaHist1_" + name + ";runNumber;etaLab;entries (+)", nBinsRunNumber, minBound, maxBound, 201, 0, 10);	etaHist1->SetLineColor(kRed);
-
-	phiHist = new TH2D("phiHist_" + name, "phiHist_" + name + ";runNumber;phi;entries", nBinsRunNumber, minBound, maxBound, 101, -3.5, 3.5);
-	phiHist0 = new TH2D("phiHist0_" + name, "phiHist0_" + name + ";runNumber;phi;entries (-)", nBinsRunNumber, minBound, maxBound, 101, -3.5, 3.5);	phiHist0->SetLineColor(kBlue);
-	phiHist1 = new TH2D("phiHist1_" + name, "phiHist1_" + name + ";runNumber;phi;entries (+)", nBinsRunNumber, minBound, maxBound, 101, -3.5, 3.5);	phiHist1->SetLineColor(kRed);
+	phiHist = new TH2D("phiHist_" + name, "phiHist_" + name + ";runNumber;phi;entries", nBinsRunNumber, minBound,
+					   maxBound, 101, -3.5, 3.5);
 }
 
 
@@ -1931,36 +1921,17 @@ void TimeHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	chargeHist->Fill(myEventInfo.myRunNumber, vtxTrack.GetCharge());
 
 	pHist->Fill(myEventInfo.myRunNumber,p);
-	pxHist->Fill(myEventInfo.myRunNumber, pX);
-	pyHist->Fill(myEventInfo.myRunNumber, pY);
-	pzHist->Fill(myEventInfo.myRunNumber, pZ);
 	ptHist->Fill(myEventInfo.myRunNumber, pT);
-	etaHist->Fill(myEventInfo.myRunNumber, eta);
 	phiHist->Fill(myEventInfo.myRunNumber, phi);
 
 
 	if (vtxTrack.GetCharge() == 1)
 	{
-		pHist1->Fill(myEventInfo.myRunNumber, p);
-		pxHist1->Fill(myEventInfo.myRunNumber, pX);
-		pyHist1->Fill(myEventInfo.myRunNumber, pY);
-		pzHist1->Fill(myEventInfo.myRunNumber, pZ);
-		ptHist1->Fill(myEventInfo.myRunNumber, pT);
-		etaHist1->Fill(myEventInfo.myRunNumber, eta);
-		phiHist1->Fill(myEventInfo.myRunNumber, phi);
 		nTracks1++;
 	}
 	else
 	{
-		pHist0->Fill(myEventInfo.myRunNumber, p);
-		pxHist0->Fill(myEventInfo.myRunNumber, pX);
-		pyHist0->Fill(myEventInfo.myRunNumber, pY);
-		pzHist0->Fill(myEventInfo.myRunNumber, pZ);
-		ptHist0->Fill(myEventInfo.myRunNumber, pT);
-		etaHist0->Fill(myEventInfo.myRunNumber, eta);
-		phiHist0->Fill(myEventInfo.myRunNumber, phi);
 		nTracks0++;
-
 	}
 }
 
@@ -1976,7 +1947,9 @@ void TimeHandler::EndOfEvent(Event& ev)
 	multHist->Fill(myEventInfo.myRunNumber, nTracks0 + nTracks1);
 
 	bEventInfoFull = false;
-	fitVtxHist->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxZ);
+	fitVtxHistZ->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxZ);
+    fitVtxHistX->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxX);
+    fitVtxHistY->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxY);
 
 	psdEnergyHist->Fill(myEventInfo.myRunNumber, myEventInfo.myEnergyPSD);
 

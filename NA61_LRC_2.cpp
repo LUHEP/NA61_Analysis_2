@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 1;
+	const int N0 = 0;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
 
-	const int N4 = 0;
+	const int N4 = 2;
 	TimeHandler* arTime[N4];
 	for (int i = 0; i<N4; i++){
 		TString name;
