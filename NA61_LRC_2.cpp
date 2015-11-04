@@ -137,9 +137,13 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
+		if (i==0 || i==1)
+			arOneWindHandler[i]->AddRunNumberCut(0,20445);
+		if (i==2 || i==3)
+			arOneWindHandler[i]->AddRunNumberCut(20445,20500);
 		arOneWindHandler[i]->AddStandardCutsRaw();
-		arOneWindHandler[i]->AddRunNumberCut(20445,20500);
-		//arOneWindHandler[i]->AddPSDEnergyCut(0, 1850);
+		if (i==1 || i==3)
+			arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
@@ -205,7 +209,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
 
-	const int N4 = 2;
+	const int N4 = 0;
 	TimeHandler* arTime[N4];
 	for (int i = 0; i<N4; i++){
 		TString name;
@@ -217,7 +221,7 @@ int main(int argc, char* argv[])
 		arTime[i]->AddStandardCutsRaw();
 //		arTime[i]->AddPSDCloudsCut();
         if (i==1)
-    		arTime[i]->AddPSDEnergyCut(0, 2400, e28Central);
+    		arTime[i]->AddPSDEnergyCut(0, 1850, e28Central);
 		HandList->AddHandler(arTime[i]);
 	}
 
@@ -254,6 +258,20 @@ int main(int argc, char* argv[])
 		arLRCHandler[i]->AddEtaForward(5.5, 6);
 		arLRCHandler[i]->AddEtaBackward(3.2 + i*0.2, 3.7 + i*0.2);
 		HandList->AddHandler(arLRCHandler[i]);
+	}
+
+	const int N8 = 1;
+	PSDHandler* arPSDHandler[N8];
+	for (int i = 0; i<N8; i++){
+		TString name;
+		TString nameBasic = "PSD";
+		char name2[50];
+		sprintf(name2, "_%i", i);
+		name = nameBasic + name2;
+		arPSDHandler[i] = new PSDHandler(name + "Raw.root", false);
+		arPSDHandler[i]->AddRunNumberCut(0,20445);
+		arPSDHandler[i]->AddStandardCutsRaw();
+		HandList->AddHandler(arPSDHandler[i]);
 	}
 
 	//FIXME: add information about energy and system type inside names of hists!

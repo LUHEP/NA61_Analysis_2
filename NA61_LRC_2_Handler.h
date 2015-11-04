@@ -381,6 +381,23 @@ private:
 	TH2D*	psdEnergyHist;
 	TH2D	*chargeHist,	*multHist,
 		*pHist, *ptHist,	*phiHist;
-    
     TH2D  *fitVtxHistX, *fitVtxHistY, *fitVtxHistZ;
+};
+
+// --- search of correlations between different PSD modules
+class PSDHandler : public BaseHandler
+{
+public:
+	PSDHandler(const char* nameOut);
+	PSDHandler(const char* nameOut, bool sim);
+	~PSDHandler();
+
+	void PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev);
+	void PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev);
+	void EndOfEvent(Event& ev);
+	void Init();
+
+private:
+	PSDHandler();
+	THnSparseD* myModuleSparse;
 };

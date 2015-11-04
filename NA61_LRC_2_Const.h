@@ -74,6 +74,7 @@ const string str_configPath ="/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetI
 //const string str_configPath = "/afs/cern.ch/work/a/aseryako/lxbutch/fromZorg";
 
 // --- PSD consts
+const Int_t nPSDModules = 44;
 const Int_t nPSDMods = 28; 
 const double_t class1Min = 0; 
 const double_t class2Min = 584.135;
@@ -139,7 +140,24 @@ const int arNBinsPSDFluc[nBinsPSDFluc]	 = { 301, 600, 1700, 30 };
 const double arXminPSDFluc[nBinsPSDFluc] = { -0.5, 0, -2000, -0.5 };
 const double arXmaxPSDFluc[nBinsPSDFluc] = { 300.5, 1.5, 6500, 29.5 };
 
-//consts for TimeHandler 
+// --- const for PSDHanler
+// iModule PSD energy
+const int nBinsPSDModules = nPSDModules + 1;
+const int arNBinsPSDModules[nBinsPSDModules] = {151,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
+												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
+												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
+const double arXminPSDModules[nBinsPSDModules] = {-0.5,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
+												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
+												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
+												  -10,-10,-10};
+const double arXmaxPSDModules[nBinsPSDModules] = {150.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
+                                                  1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
+                                                  1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
+                                                  1200,1200,1200};
+
+
+
+//consts for TimeHandler
 const double minRunNumberArSc150 = 20300;
 const double maxRunNumberArSc150 = 20500; 
 const double minRunNumberArSc13 = 20500;

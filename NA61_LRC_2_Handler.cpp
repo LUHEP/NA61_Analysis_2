@@ -1956,3 +1956,75 @@ void TimeHandler::EndOfEvent(Event& ev)
 	nTracks0 = 0;
 	nTracks1 = 0;
 }
+
+PSDHandler::PSDHandler(const char *nameOut):BaseHandler(nameOut) { }
+PSDHandler::PSDHandler(const char *nameOut, bool sim) : BaseHandler(nameOut,sim){ }
+PSDHandler::~PSDHandler()
+{
+    cout << "name outFile = " << nameOutFile << endl;
+    TFile outputFile(nameOutFile, "RECREATE");
+    outputFile.cd();
+
+    TH1F* eventStat = myEventCutList->GetStatHist(nameOutFile + myNameHist, bSim);
+    TH1F* trackStat = myTrackCutList->GetStatHist(nameOutFile + myNameHist, bSim);
+
+    myModuleSparse->Write();
+    eventStat->Write();
+    trackStat->Write();
+
+    cout << nameOutFile << endl;
+    double tmp = nPSDModules+1;
+    cout << "nEvent:  " << myModuleSparse->GetEntries()/tmp << endl;
+    outputFile.Close();
+}
+
+void PSDHandler::Init()
+{
+    cout << "initialisation of the PSD module handler" << endl;
+    init = true;
+    TString string1;
+    if (bSim == true) string1 = "Sim";
+    else string1 = "Rec";
+    if (bRaw == true) string1 = "Raw";
+    TString name = "PSDModules_" + myEventCutList->GetName()+ myTrackCutList->GetName() + string1;
+    myNameHist = name;
+
+    myModuleSparse = new THnSparseD(name, name, nBinsPSDModules, arNBinsPSDModules, arXminPSDModules, arXmaxPSDModules);
+}
+
+void PSDHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
+{
+    if (init == false) this->Init();
+    if (myTrackCutList->TrackTest(vtxTrack, ev) == 0) return;
+
+    if (vtxTrack.GetCharge() == 1)
+        nTracks1++;
+    else
+        nTracks0++;
+}
+
+void PSDHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
+{
+    if (init == false) this->Init();
+    if (myTrackCutList->TrackTest(vtxTrack, ev) == 0) return;
+
+    if (vtxTrack.GetCharge() == 1)
+        nTracks1++;
+    else
+        nTracks0++;
+}
+
+void PSDHandler::EndOfEvent(Event & ev) {
+    if (init == false) { this->Init(); }
+    double arVal[nBinsPSDModules] = {0};
+    arVal[0] = nTracks0 + nTracks1;
+    RecEvent *pRecEvent = &ev.GetRecEvent();
+    PSD &psd = pRecEvent->GetPSD();
+    for (int i = 1; i < nBinsPSDModules; i++)
+        arVal[i] = psd.GetModule(i).GetEnergy();
+
+
+    myModuleSparse->Fill(arVal);
+    nTracks0 = 0;
+    nTracks1 = 0;
+}
