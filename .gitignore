@@ -12,3 +12,6 @@ tmp
 LRC_pile
 Debug
 files
+.kdev4/
+*.kdev4
+.directory
