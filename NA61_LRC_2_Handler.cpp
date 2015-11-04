@@ -1120,6 +1120,11 @@ void BaseHandler::AddRunNumberCut(int lowLimit, int upLimit)
 	myEventCutList->AddCut(A);
 }
 
+void BaseHandler::AddStrangeCut()
+{
+    StrangeCut* cut = new StrangeCut();
+    myTrackCutList->AddCut(cut);
+}
 
 
 

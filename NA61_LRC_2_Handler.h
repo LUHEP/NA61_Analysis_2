@@ -152,6 +152,7 @@ public:
 	void AddPhiCut(double_t minPhi, double_t maxPhi);
 	void AddChargeTrkCut(int charge);
 	void AddDiluteCut(double remove_track_percent);
+	void AddStrangeCut();
 
 
 
