@@ -1774,3 +1774,40 @@ TString RunNumberCut::GetShortNameWithPar()
 	name = my_Short_Name + name2;
 	return name;
 }
+
+const int StrangeCut::strangeIdList[] = {
+    130, 310, 311, 321, 10311, 10321, 100311, 100321, 200311, 200321, 9000311, 
+    9000321, 313, 323, 10313, 10323, 20313, 20323, 100313, 100323, 9000313, 9000323, 
+    30313, 30323, 315, 325, 9000315, 9000325, 10315, 10325, 20315, 20325, 100315, 
+    100325, 9010315, 9010325, 317, 327, 9010317, 9010327, 319, 329, 9000319, 
+    9000329, -130, -310, -311, -321, -10311, -10321, -100311, -100321, -200311, 
+    -200321, -9000311, -9000321, -313, -323, -10313, -10323, -20313, -20323, 
+    -100313, -100323, -9000313, -9000323, -30313, -30323, -315, -325, -9000315, 
+    -9000325, -10315, -10325, -20315, -20325, -100315, -100325, -9010315, -9010325, 
+    -317, -327, -9010317, -9010327, -319, -329, -9000319, -9000329
+}; //list of strange particle id's
+const int StrangeCut::strangeIdListLength = 88;
+
+StrangeCut::StrangeCut()
+{
+    my_Name = "Strange Cut";
+    my_Short_Name = "StrangeK";
+}
+
+TString StrangeCut::GetShortNameWithPar()
+{
+    return my_Short_Name;
+}
+
+
+
+bool StrangeCut::CheckTrack(SimEvent& simEvent, const sim::VertexTrack& vtxTrack)
+{
+    int partId = vtxTrack.GetParticleId();
+    for (int i = 0; i < strangeIdListLength; i++) {
+        if (strangeIdList[i] == partId) {
+            return true;
+        }
+    }
+    return false;
+}

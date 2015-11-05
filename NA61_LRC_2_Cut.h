@@ -475,6 +475,19 @@ private:
 	static TCutG *myTCutG;
 };
 
+class StrangeCut: public TrackCut
+{
+public:
+    StrangeCut();
+//     ~StrangeCut();
+    bool CheckTrack ( SimEvent& simEvent, const sim::VertexTrack& vtxTrack );
+    bool CheckTrack ( RecEvent& recEvent, const VertexTrack& vtxTrack ) {};
+    TString GetShortNameWithPar();
+private:
+    static const int strangeIdList[];
+    static const int strangeIdListLength;
+};
+
 class PSDEnergyCut :public EventCut
 {
 public:

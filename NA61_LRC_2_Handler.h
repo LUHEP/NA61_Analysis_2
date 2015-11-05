@@ -109,6 +109,8 @@ public:
     void SetEventNumber(int nEvent); /// Does it exist?
 	bool GetSim() {return bSim;}
 
+	void AddEventCut(EventCut* cut);
+	void AddTrackCut(TrackCut* cut);
 
 	void AddT2Cut();
 	void AddS1_1Cut();
@@ -152,6 +154,7 @@ public:
 	void AddPhiCut(double_t minPhi, double_t maxPhi);
 	void AddChargeTrkCut(int charge);
 	void AddDiluteCut(double remove_track_percent);
+	void AddStrangeCut();
 
 
 
@@ -248,6 +251,9 @@ public:
 	void PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev);
 	void EndOfEvent(Event& ev);
 	void Init();
+	
+	void AddForwardCut(TrackCut* cut);
+	void AddBackwardCut(TrackCut* cut);
 
 	void AddPhiForward(double_t minPhi, double_t maxPhi);
 	void AddPhiBackward(double_t minPhi, double_t maxPhi);

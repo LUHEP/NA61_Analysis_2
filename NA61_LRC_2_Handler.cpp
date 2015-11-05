@@ -51,6 +51,17 @@ bool BaseHandler::EventTest(Event& ev)
 	return myEventCutList->EventTest(ev, bSim);
 }
 
+void BaseHandler::AddEventCut(EventCut* cut)
+{
+    myEventCutList->AddCut(cut);
+}
+
+void BaseHandler::AddTrackCut(TrackCut* cut)
+{
+    myTrackCutList->AddCut(cut);
+}
+
+
 StatEventInfo OneWindHandler::myEventInfo;
 bool OneWindHandler::bEventInfoFull = false;
 
@@ -512,6 +523,16 @@ void LRCHandler::Init()
 	myPosBackNegForTHSparse	 = new THnSparseD("PosBackNegFor_"+name, name, nBins, arNBins, arXmin, arXmax);
 	myNegBackPosForTHSparse	 = new THnSparseD("NegBackPosFor_"+name, name, nBins, arNBins, arXmin, arXmax);
 
+}
+
+void LRCHandler::AddForwardCut(TrackCut* cut)
+{
+    myForwardTrackCutList->AddCut(cut);
+}
+
+void LRCHandler::AddBackwardCut(TrackCut* cut)
+{
+    myBackwardTrackCutList->AddCut(cut);
 }
 
 LRCHandler::~LRCHandler()
@@ -1120,6 +1141,11 @@ void BaseHandler::AddRunNumberCut(int lowLimit, int upLimit)
 	myEventCutList->AddCut(A);
 }
 
+void BaseHandler::AddStrangeCut()
+{
+    StrangeCut* cut = new StrangeCut();
+    myTrackCutList->AddCut(cut);
+}
 
 
 
