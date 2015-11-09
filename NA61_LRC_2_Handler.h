@@ -112,6 +112,7 @@ public:
 	void AddEventCut(EventCut* cut);
 	void AddTrackCut(TrackCut* cut);
 
+	void AddTrigger(eTrigger trigger);
 	void AddT2Cut();
 	void AddS1_1Cut();
 	void AddWFACut();

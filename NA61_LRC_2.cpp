@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 0;
+	const int N0 = 1;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -137,26 +137,32 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
-		if (i==0 || i==1)
+/*		if (i==0 || i==1)
 			arOneWindHandler[i]->AddRunNumberCut(0,20445);
 		if (i==2 || i==3)
-			arOneWindHandler[i]->AddRunNumberCut(20445,20500);
+			arOneWindHandler[i]->AddRunNumberCut(20445,20500);*/
 		arOneWindHandler[i]->AddStandardCutsRaw();
-		if (i==1 || i==3)
-			arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
+//		if (i==1 || i==3)
+//			arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
     const int N1=0;//1;
 	PtNFluctuationHandler* arHandlerFlucPtNRaw[N1];
-    for (int i =1; i<N1; i++){
+    for (int i =0; i<N1; i++){
         TString name;
         TString nameBasic="Full_FlucPt";
         char name2[50];
         sprintf(name2,"_%i",i);
         name = nameBasic + name2;
 		arHandlerFlucPtNRaw[i] = new PtNFluctuationHandler(name + "Raw.root", false);
+		if (i==0 || i==1)
+			arHandlerFlucPtNRaw[i]->AddRunNumberCut(0,20445);
+		if (i==2 || i==3)
+			arHandlerFlucPtNRaw[i]->AddRunNumberCut(20445,20500);
 		arHandlerFlucPtNRaw[i]->AddStandardCutsRaw();
+		if (i==1 || i==3)
+			arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(1850, e28Central);
 
 
 		//arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(0, 80);
@@ -183,14 +189,14 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arHandlerFlucPSDRaw[i] = new PSDFluctuationHandler(name + "Raw.root", false);
+
+		if (i==0 || i==1)
+			arHandlerFlucPSDRaw[i]->AddRunNumberCut(0,20445);
+		if (i==2 || i==3)
+			arHandlerFlucPSDRaw[i]->AddRunNumberCut(20445,20500);
 		arHandlerFlucPSDRaw[i]->AddStandardCutsRaw();
-/*		if (i == 1)
-			arHandlerFlucPSDRaw[i]->AddPSDEnergyCut(0, 4 * beamMomentum);
-		if (i == 2)
-			arHandlerFlucPSDRaw[i]->AddPSDEnergyCut(0, 12 * beamMomentum);
-		if (i == 3)
-			arHandlerFlucPSDRaw[i]->AddPSDEnergyCut(0, 17 * beamMomentum);
-		*/
+		if (i==1 || i==3)
+			arHandlerFlucPSDRaw[i]->AddPSDEnergyCut(1850, e28Central);
 		HandList->AddHandler(arHandlerFlucPSDRaw[i]);
 	}
 
@@ -209,7 +215,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
 
-	const int N4 = 0;
+	const int N4 = 1;
 	TimeHandler* arTime[N4];
 	for (int i = 0; i<N4; i++){
 		TString name;
@@ -323,7 +329,8 @@ int main(int argc, char* argv[])
 void BaseHandler::AddStandardCutsRaw()
 {
 	this->Raw();
-	this->AddT2Cut();
+	this->AddTrigger(T2);
+//	this->AddTrigger(T1);
 	if (systemType == ArSc)
 		this->AddWFACut(-100, -200, 25);
 	else 

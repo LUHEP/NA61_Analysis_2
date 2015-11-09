@@ -847,6 +847,12 @@ void LRCHandler::EndOfEvent(Event& ev)
 //}
 
 
+void BaseHandler::AddTrigger(eTrigger trigger)
+{
+	Cut* T = new TriggerCut(trigger);
+	myEventCutList->AddCut(T);
+}
+
 void BaseHandler::AddT2Cut()
 {
     Cut* T2 = new T2Cut();

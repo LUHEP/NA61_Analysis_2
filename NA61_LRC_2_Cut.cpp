@@ -28,10 +28,40 @@ bool T2Cut::CheckEvent(Event& event, bool bSim)
 	return 1;
 }
 
+TriggerCut::TriggerCut(eTrigger trigger)
+{
+    myTrigger = trigger;
+    switch (trigger){
+        case T1:
+            my_Name = "T1_trigger";
+            my_Short_Name = "T1";
+            break;
+        case T2:
+            my_Name = "T2_trigger";
+            my_Short_Name = "T2";
+            break;
+        default:
+            my_Name = "trigger_error";
+            my_Short_Name = "trigger_error";
+    }
+}
+
+bool TriggerCut::CheckEvent(Event &event, bool bSim)
+{
+    const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger();
+    if (myTrigger == T2 && (!trigger.IsTrigger(det::TriggerConst::eT2, det::TriggerConst::ePrescaled)))
+        return 0;
+    if (myTrigger == T1 && (!trigger.IsTrigger(det::TriggerConst::eT1, det::TriggerConst::ePrescaled)))
+        return 0;
+    myNEntries++;
+    return 1;
+}
+
+
 S1_1Cut::S1_1Cut()
 {
 	my_Name = "S1_1";
-	my_Short_Name = "S1_1"; 
+	my_Short_Name = "S1_1";
 }
 
 bool S1_1Cut::CheckEvent(Event& event, bool bSim)

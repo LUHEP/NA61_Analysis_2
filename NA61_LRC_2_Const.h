@@ -66,6 +66,7 @@ const double beamRapidity = 0.5*log((sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMom
 enum eSystemType{pp, BeBe, ArSc, PbPb};
 const eSystemType systemType = ArSc;
 enum eMyBPD{BPD1, BPD2, BPD3};
+enum eTrigger{T1, T2};
 
 // Change it to your path
 const TString configPath = "/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetIN";

@@ -104,6 +104,17 @@ private:
     
 };
 
+class TriggerCut:public EventCut
+{
+public:
+    TriggerCut(eTrigger trigger);
+    ~TriggerCut(){}
+    TString GetShortNameWithPar() { return my_Short_Name;}
+    bool CheckEvent(Event& event, bool bSim);
+private:
+    eTrigger myTrigger;
+};
+
 class S1_1Cut:public EventCut
 {
 public:
