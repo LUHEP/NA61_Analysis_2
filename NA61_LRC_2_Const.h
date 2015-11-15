@@ -172,7 +172,7 @@ const double maxRunNumberArSc40 = 21270;
 
 //for strange PSD_N clouds 
 enum ePSDNClouds {good, garbageHighPSD, garbageLowPSDLowN,garbageLowPSDHighN};
-enum ePSDModulCombinations {eAll, e28Central, e16Central,e28Periferal};
+enum ePSDModulCombinations {eAll, e28Central, e16Central,e28Periferal, e6Module, e8Module, e11Module, e29Module, e44Module};
 
 //							0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22
 //double weightsPSD[45] = {	0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -192,3 +192,22 @@ TCutG electronCut75("electronCut75", 13, electronCut75_x, electronCut75_y);
 const double electronCut40_x[10] = { -0.703944, -0.226909, 0.0911135, 1.02247, 1.07358, 0.647653, 0.000249865, -0.675549, -0.732338, -0.703944 };
 const double electronCut40_y[10] = { 1.36965, 1.31561, 1.34886, 1.48188, 1.61905, 1.68556, 1.88509, 1.84352, 1.63568, 1.36965 };
 TCutG electronCut40("electronCut40", 10, electronCut40_x, electronCut40_y);*/
+
+//for 0Energy in PSD cut
+const int nRunsWith0EnergyInOnePSDModule = 14;
+const int arRunsWith0EnergyInOnePSDModule[nRunsWith0EnergyInOnePSDModule] [2]= { //[iRun][iModule]
+		{20451, 6},
+		{20413, 8},
+		{20455, 8},
+		{20459, 8},
+		{20337, 11},
+		{20365, 11},
+		{20432, 11},
+		{20458, 11},
+		{20360, 29},
+		{20362, 29},
+		{20363, 29},
+		{20364, 29},
+		{20365, 29},
+		{20457, 44}
+};

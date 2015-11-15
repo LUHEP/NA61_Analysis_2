@@ -937,6 +937,12 @@ void BaseHandler::AddZVtxCut()
     myEventCutList->AddCut(A);
 }
 
+void BaseHandler::Remove0EPSDEvents()
+{
+	Cut* A = new RunWith0EnergyInOneModuleCut(bRaw);
+	myEventCutList->AddCut(A);
+}
+
 void BaseHandler::AddZVtxCut(double_t minZ, double_t maxZ)
 {
     if (minZ>maxZ) 

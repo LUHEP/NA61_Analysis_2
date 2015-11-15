@@ -545,3 +545,19 @@ private:
     int myUpLim;
     bool myBRaw;
 };
+
+// to exclude events with not working PSD modules
+// написан, конечно, совершенно не оптимально =/
+class RunWith0EnergyInOneModuleCut : public EventCut
+{
+public:
+    RunWith0EnergyInOneModuleCut(bool bRaw);
+    ~RunWith0EnergyInOneModuleCut(){};
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    RunWith0EnergyInOneModuleCut();
+    bool myBRaw;
+
+};

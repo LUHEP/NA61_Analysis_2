@@ -293,8 +293,8 @@ bool DirectBPDCut::CheckEvent(Event& event, bool bSim)
 	if (bSim == false){
 		evt::rec::Beam beam = event.GetRecEvent().GetBeam();
 		double BPDcoord[6] = { 0 };
-		for (int i = 0; i<6; i++)
-			BPDcoord[i] = beam.GetBPDPlane((det::BPDConst::EPlaneId)i).GetPosition();
+        for (int i = 0; i<6; i++)
+            BPDcoord[i] = beam.GetBPDPlane((det::BPDConst::EPlaneId)i).GetPosition();
 		double X, Y;
 		switch (myBPD)			
 		{
@@ -1688,27 +1688,50 @@ PSDEnergyCut::PSDEnergyCut(double lowE, double upE, ePSDModulCombinations ePSDSe
 
 	switch (ePSDSet)
 	{
-	case e28Central:
-		for (int i = 1; i < 29; i++)
-			myPSDModArray[i] = 1;
-		name = "28Central";
-		break;
-	case e16Central:
-		for (int i = 1; i < 17; i++)
-			myPSDModArray[i] = 1;
-		name = "16Central";
-		break;
-	case e28Periferal:
-		for (int i = 17; i < 45; i++)
-			myPSDModArray[i] = 1;
-		name = "28Periferal";
-		break;
+	    case e28Central:
+		    for (int i = 1; i < 29; i++)
+			    myPSDModArray[i] = 1;
+            name = "28Central";
+		    break;
+	    case e16Central:
+		    for (int i = 1; i < 17; i++)
+		    	myPSDModArray[i] = 1;
+		    name = "16Central";
+		    break;
+	    case e28Periferal:
+		    for (int i = 17; i < 45; i++)
+		    	myPSDModArray[i] = 1;
+		    name = "28Periferal";
+		    break;
+        case e6Module:
+            myPSDModArray[6] = 1;
+            name = "6Module";
+            break;
+        case e8Module:
+            myPSDModArray[8] = 1;
+            name = "8Module";
+            break;
+        case e11Module:
+            myPSDModArray[11] = 1;
+            name = "11Module";
+            break;
+        case e29Module:
+            myPSDModArray[29] = 1;
+            name = "29Module";
+            break;
+        case e44Module:
+            myPSDModArray[44] = 1;
+            name = "44Module";
+            break;
+        case eAll:;
 	default:
 		for (int i = 1; i < 45; i++)
 			myPSDModArray[i] = 1;
 		name = "All";
 		break;
-	}
+
+
+    }
 	my_Name = "PSD_Energy_direct_cut_" + name;
 	my_Short_Name = "direct_psd_" + name;
 
@@ -1840,4 +1863,37 @@ bool StrangeCut::CheckTrack(SimEvent& simEvent, const sim::VertexTrack& vtxTrack
         }
     }
     return false;
+}
+
+RunWith0EnergyInOneModuleCut::RunWith0EnergyInOneModuleCut(bool bRaw)
+{
+    myBRaw = bRaw;
+	my_Name = "Zero_Energy_PSD_module";
+	my_Short_Name = "ZeroEPSD";
+}
+
+TString RunWith0EnergyInOneModuleCut::GetShortNameWithPar()
+{
+	return my_Short_Name;
+}
+
+bool RunWith0EnergyInOneModuleCut::CheckEvent(Event &event, bool bSim)
+{
+	if (myBRaw = false)
+		return true;//notrhing to do
+	int runNumber = event.GetEventHeader().GetRunNumber();
+    for (int i = 0; i < nRunsWith0EnergyInOnePSDModule; i++){
+        if (runNumber == arRunsWith0EnergyInOnePSDModule[i][0]){
+                RecEvent* pRecEvent = &event.GetRecEvent();
+            PSD& psd = pRecEvent->GetPSD();
+            if (psd.GetModule(arRunsWith0EnergyInOnePSDModule[i][1]).GetEnergy() == 0)
+                return false;
+            else{
+                myNEntries++;
+                return true;
+            }
+        }
+    }
+	myNEntries++;
+	return true;
 }
