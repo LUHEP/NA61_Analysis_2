@@ -561,3 +561,31 @@ private:
     bool myBRaw;
 
 };
+
+class RunWith0EnergyInOneModuleCutVer2 : public EventCut
+{
+public:
+    RunWith0EnergyInOneModuleCutVer2(bool bRaw);
+    ~RunWith0EnergyInOneModuleCutVer2(){};
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    RunWith0EnergyInOneModuleCutVer2();
+    bool myBRaw;
+
+};
+
+class PSDTimeStampCut : public EventCut
+{
+public:
+    PSDTimeStampCut(bool bRaw, unsigned int maxSectionsWith0);
+    ~PSDTimeStampCut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    PSDTimeStampCut();
+    bool myBRaw;
+    unsigned int myMaxOkNSectionsWith0;
+};

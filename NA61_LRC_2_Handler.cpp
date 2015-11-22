@@ -939,7 +939,7 @@ void BaseHandler::AddZVtxCut()
 
 void BaseHandler::Remove0EPSDEvents()
 {
-	Cut* A = new RunWith0EnergyInOneModuleCut(bRaw);
+	Cut* A = new RunWith0EnergyInOneModuleCutVer2(bRaw);
 	myEventCutList->AddCut(A);
 }
 
@@ -1219,6 +1219,12 @@ void LRCHandler::AddPtBackward(double_t minPt, double_t maxPt)
 	myBackwardTrackCutList->AddCut(A);
 } 
 
+void BaseHandler::AddPSDTimeStampCut(unsigned int maxOkSectionsWith0)
+{
+    Cut* A = new PSDTimeStampCut(bRaw, maxOkSectionsWith0);
+    myEventCutList->AddCut(A);
+
+}
 
 void StatEventInfo::Reset()
 {
@@ -1840,7 +1846,10 @@ TimeHandler::~TimeHandler()
 	fitVtxHistY->Write();
 	fitVtxHistZ->Write();
 
-	cout << nameOutFile << endl;
+  //  fitVtxHistXverMult->Write();
+   // fitVtxHistYverMult->Write();
+
+    cout << nameOutFile << endl;
 	cout << "nEvent:  " << multHist->GetEntries() << endl;
 	cout << "nTracks: " << phiHist->GetEntries() << endl << endl;
 
@@ -1923,6 +1932,11 @@ void TimeHandler::Init() {
 
 	phiHist = new TH2D("phiHist_" + name, "phiHist_" + name + ";runNumber;phi;entries", nBinsRunNumber, minBound,
 					   maxBound, 101, -3.5, 3.5);
+/*
+	fitVtxHistXverMult = new TH2D("Fitted_Vtx_Position_X_versus_mult_" + name, "fitVtxXverMult_" + name + ";runNumber;x/mult [cm]; entries",
+						   nBinsRunNumber, minBound, maxBound, 1001, -1, 1);
+	fitVtxHistYverMult = new TH2D("Fitted_Vtx_Position_Y_versus_mult_" + name, "fitVtxYverMult_" + name + ";runNumber;y/mult [cm]; entries",
+						   nBinsRunNumber, minBound, maxBound, 1001, -1, 1);*/
 }
 
 
@@ -1989,6 +2003,9 @@ void TimeHandler::EndOfEvent(Event& ev)
     fitVtxHistX->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxX);
     fitVtxHistY->Fill(myEventInfo.myRunNumber,myEventInfo.myFitVtxY);
 
+//    fitVtxHistXverMult->Fill(myEventInfo.myRunNumber, myEventInfo.myFitVtxX / (nTracks0 + nTracks1));
+ //   fitVtxHistYverMult->Fill(myEventInfo.myRunNumber, myEventInfo.myFitVtxY / (nTracks0 + nTracks1));
+
 	psdEnergyHist->Fill(myEventInfo.myRunNumber, myEventInfo.myEnergyPSD);
 
 	nTracks0 = 0;
@@ -2027,7 +2044,20 @@ void PSDHandler::Init()
     TString name = "PSDModules_" + myEventCutList->GetName()+ myTrackCutList->GetName() + string1;
     myNameHist = name;
 
-    myModuleSparse = new THnSparseD(name, name, nBinsPSDModules, arNBinsPSDModules, arXminPSDModules, arXmaxPSDModules);
+	double* arXMax;
+	switch (systemType){
+		case ArSc:
+			arXMax = arXmaxPSDModulesArSc150;
+			break;
+		case BeB:
+			arXMax = arXmaxPSDModulesBeBe150;
+			break;
+		default:
+			arXMax = arXmaxPSDModulesArSc150;
+			break;
+	}
+
+    myModuleSparse = new THnSparseD(name, name, nBinsPSDModules, arNBinsPSDModules, arXminPSDModules, arXMax);
 }
 
 void PSDHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)

@@ -64,7 +64,7 @@ const double beamRapidity = 0.5*log((sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMom
 	(sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMomentum) - dBeamMomentum));
 
 enum eSystemType{pp, BeBe, ArSc, PbPb};
-const eSystemType systemType = ArSc;
+const eSystemType systemType = BeBe;
 enum eMyBPD{BPD1, BPD2, BPD3};
 enum eTrigger{T1, T2};
 
@@ -76,6 +76,7 @@ const string str_configPath ="/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetI
 
 // --- PSD consts
 const Int_t nPSDModules = 44;
+const Int_t nPSDSections = 10;
 const Int_t nPSDMods = 28; 
 const double_t class1Min = 0; 
 const double_t class2Min = 584.135;
@@ -147,14 +148,19 @@ const int nBinsPSDModules = nPSDModules + 1;
 const int arNBinsPSDModules[nBinsPSDModules] = {151,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
+
 const double arXminPSDModules[nBinsPSDModules] = {-0.5,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10};
-const double arXmaxPSDModules[nBinsPSDModules] = {150.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
+const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {150.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200};
+const double arXmaxPSDModulesBeBe150[nBinsPSDModules] = {40.5,600,600,600,600,600,600,600,600,600,600,600,600,600,
+												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
+												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
+												  600,600,600};
 
 
 
@@ -172,7 +178,7 @@ const double maxRunNumberArSc40 = 21270;
 
 //for strange PSD_N clouds 
 enum ePSDNClouds {good, garbageHighPSD, garbageLowPSDLowN,garbageLowPSDHighN};
-enum ePSDModulCombinations {eAll, e28Central, e16Central,e28Periferal, e6Module, e8Module, e11Module, e29Module, e44Module};
+enum ePSDModulCombinations {eAll, e28Central, e16Central,e28Periferal, e6Module, e8Module, e10Module, e11Module, e29Module, e44Module};
 
 //							0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22
 //double weightsPSD[45] = {	0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,

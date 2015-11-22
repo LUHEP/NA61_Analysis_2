@@ -136,6 +136,7 @@ public:
 	void AddS5Cut(double upLimit);
 	void AddRunNumberCut(int lowLimit, int upLimit);
 	void Remove0EPSDEvents();
+    void AddPSDTimeStampCut(unsigned int maxOkSectionsWith0);
 
 	void AddVtxTrackStatusCut();
 	void AddImpactPointCut();
@@ -390,6 +391,7 @@ private:
 	TH2D	*chargeHist,	*multHist,
 		*pHist, *ptHist,	*phiHist;
     TH2D  *fitVtxHistX, *fitVtxHistY, *fitVtxHistZ;
+//	TH2D  *fitVtxHistXverMult, *fitVtxHistYverMult;
 };
 
 // --- search of correlations between different PSD modules
@@ -409,3 +411,4 @@ private:
 	PSDHandler();
 	THnSparseD* myModuleSparse;
 };
+

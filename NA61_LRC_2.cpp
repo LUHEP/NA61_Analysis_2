@@ -215,9 +215,9 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
 
-	const int N4 = 1;
+	const int N4 = 0;
 	TimeHandler* arTime[N4];
-	for (int i = 0; i<N4; i++){
+	for (int i =0; i<N4; i++){
 		TString name;
 		TString nameBasic = "Time";
 		char name2[50];
@@ -225,9 +225,19 @@ int main(int argc, char* argv[])
 		name = nameBasic + name2;
 		arTime[i] = new TimeHandler(name + "Raw.root", false);
 		arTime[i]->AddStandardCutsRaw();
+//        if (i==1)
+ //           arTime[i]->AddPSDEnergyCut(0,2700, e28Central);
 //		arTime[i]->AddPSDCloudsCut();
-        if (i==1)
-    		arTime[i]->AddPSDEnergyCut(0, 1850, e28Central);
+//        if (i==0)
+ //   		arTime[i]->AddPSDEnergyCut(-0.001, 1, e6Module);
+  //      if (i==1)
+   //         arTime[i]->AddPSDEnergyCut(-0.001, 1, e10Module);
+    //    if (i==2)
+//            arTime[i]->AddPSDEnergyCut(-0.001, 1, e11Module);
+ //       if (i==3)
+  //          arTime[i]->AddPSDEnergyCut(-0.001, 1, e29Module);
+   //     if (i==4)
+    //        arTime[i]->AddPSDEnergyCut(-0.001, 1, e44Module);
 		HandList->AddHandler(arTime[i]);
 	}
 
@@ -275,7 +285,8 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arPSDHandler[i] = new PSDHandler(name + "Raw.root", false);
-		arPSDHandler[i]->AddRunNumberCut(0,20445);
+//		arPSDHandler[i]->AddRunNumberCut(0,20445);
+	//	arPSDHandler[i]->AddPSDTimeStampCut(i+1);
 		arPSDHandler[i]->AddStandardCutsRaw();
 		HandList->AddHandler(arPSDHandler[i]);
 	}
@@ -330,9 +341,12 @@ void BaseHandler::AddStandardCutsRaw()
 {
 	this->Raw();
 	this->AddTrigger(T2);
+//	if (systemType == ArSc)
+//		if (beamMomentum == 150)
+//			this->AddPSDTimeStampCut(10);
 //	this->AddTrigger(T1);
 	if (systemType == ArSc)
-		this->AddWFACut(-100, -200, 25);
+		this->AddWFACut(-100, -200, 4);
 	else 
 		this->AddWFACut(-100, -200, 1);
 //	this->AddChargeCut();
@@ -341,17 +355,17 @@ void BaseHandler::AddStandardCutsRaw()
 	this->AddFitQualityCut();
 	if (systemType == ArSc){
 		if (beamMomentum == 150) {
-			this->AddDirectBPDCut(-0.45, -0.12, -0.1, 0.6, BPD1);
-			this->AddDirectBPDCut(-0.15, 0.15, -0.37, -0.01, BPD3);
+//			this->AddDirectBPDCut(-0.45, -0.12, -0.1, 0.6, BPD1);
+//			this->AddDirectBPDCut(-0.15, 0.15, -0.37, -0.01, BPD3);
 			this->AddZVtxCut(-589.7, -569.7);
-			this->AddPSDEnergyCut(2370, e16Central);
-			this->AddPSDEnergyCut(800, 5000, e28Periferal);
-			this->AddS5Cut(80);
+//			this->AddPSDEnergyCut(2370, e16Central);
+//			this->AddPSDEnergyCut(800, 5000, e28Periferal);
+//			this->AddS5Cut(80);
 		}
 		if (beamMomentum == 13)
 			this->AddZVtxCut(-590, -570);
 		if (beamMomentum == 19)
-			this->AddZVtxCut(-589.9, -569.9);
+			 this->AddZVtxCut(-589.9, -569.9);
 		if (beamMomentum == 30)
 			this->AddZVtxCut(-589.9, -569.9);
 		if (beamMomentum == 40)

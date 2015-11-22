@@ -1252,7 +1252,7 @@ AcceptRapidityCut::AcceptRapidityCut()
 		nameHist = "80";
 		break;
 	case 75:
-		nameHist = "80"; //WTF?! FIXME 
+		nameHist = "80";
 		break;
 	default:
 		nameHist = "158";
@@ -1263,11 +1263,11 @@ AcceptRapidityCut::AcceptRapidityCut()
 	{
 	case BeBe:
 		//myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
-		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100.root";
+		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
 		break;
 	default:
 		//myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
-		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100.root";
+		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
 		break;
 	}
 
@@ -1278,13 +1278,13 @@ AcceptRapidityCut::AcceptRapidityCut()
 	TH3F* AcceptHist = (TH3F*)in_file->GetObjectChecked(nameHist, "TH3F");
 	myAcceptHist = (TH3F*)AcceptHist->Clone("myAccCopy");
 
-	myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(2);
-	myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(2);
-	myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(2);
+	myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(1);
+	myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(1);
+	myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(1);
 
-	myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(2);
-	myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(2);
-	myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(2);
+	myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(1);
+	myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(1);
+	myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(1);
 
 	myNXBins = myAcceptHist->GetXaxis()->GetNbins() + 1;
 	myNYBins = myAcceptHist->GetYaxis()->GetNbins() + 1;
@@ -1711,6 +1711,10 @@ PSDEnergyCut::PSDEnergyCut(double lowE, double upE, ePSDModulCombinations ePSDSe
             myPSDModArray[8] = 1;
             name = "8Module";
             break;
+		case e10Module:
+			myPSDModArray[10] = 1;
+			name = "10Module";
+			break;
         case e11Module:
             myPSDModArray[11] = 1;
             name = "11Module";
@@ -1896,4 +1900,69 @@ bool RunWith0EnergyInOneModuleCut::CheckEvent(Event &event, bool bSim)
     }
 	myNEntries++;
 	return true;
+}
+
+RunWith0EnergyInOneModuleCutVer2::RunWith0EnergyInOneModuleCutVer2(bool bRaw)
+{
+    myBRaw = bRaw;
+    my_Name = "Zero_Energy_PSD_module";
+    my_Short_Name = "ZeroEPSD";
+}
+
+TString RunWith0EnergyInOneModuleCutVer2::GetShortNameWithPar()
+{
+    return my_Short_Name;
+}
+
+bool RunWith0EnergyInOneModuleCutVer2::CheckEvent(Event &event, bool bSim)
+{
+    if (myBRaw = false)
+        return true;//notrhing to do
+    RecEvent *pRecEvent = &event.GetRecEvent();
+    PSD &psd = pRecEvent->GetPSD();
+    for (int i = 0; i < nPSDModules; i++) {
+        if (psd.GetModule(i+1).GetEnergy() == 0)
+            return false;
+    }
+    myNEntries++;
+    return true;
+}
+
+PSDTimeStampCut::PSDTimeStampCut(bool bRaw, unsigned int maxSectionsWith0)
+{
+    myBRaw = bRaw;
+    my_Name = "PSD_Time_Stamp";
+    my_Short_Name = "TimeStamp";
+    myMaxOkNSectionsWith0 = maxSectionsWith0;
+}
+
+TString PSDTimeStampCut::GetShortNameWithPar()
+{
+    TString name;
+    char name2[50];
+    sprintf(name2,"_%i",myMaxOkNSectionsWith0);
+    name = my_Short_Name + name2;
+    return name;
+}
+
+bool PSDTimeStampCut::CheckEvent(Event &event, bool bSim)
+{
+    if (myBRaw = false)
+        return true;//notrhing to do
+
+    RecEvent *pRecEvent = &event.GetRecEvent();
+    PSD &psd = pRecEvent->GetPSD();
+    for (int i = 0; i < nPSDModules; i++) {
+        int nSectionsWith0Time = 0;
+        PSDModule &module = psd.GetModule(i+1);
+        for (int j = 0; j < nPSDSections; j++) {
+            if (module.GetSection(j + 1).GetTimeStamp()  == 0) {
+                nSectionsWith0Time++;
+                if (nSectionsWith0Time > myMaxOkNSectionsWith0)
+                    return false;
+            }
+        }
+    }
+    myNEntries++;
+    return true;
 }
