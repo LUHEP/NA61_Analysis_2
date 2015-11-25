@@ -70,6 +70,8 @@ public:
 	double_t myFitVtxX;
 	double_t myFitVtxY;
 	double_t myBPD[6];
+    double_t myBeamSlopeZX;
+    double_t myBeamSlopeZY;
 	double_t myEnergyPSD;
     vector<double> myTimeStructureWFA; //Ya pomenyal
 	unsigned int myRunNumber; 
@@ -135,8 +137,10 @@ public:
 	void AddPSDCloudsCut(ePSDNClouds eCloudType);
 	void AddS5Cut(double upLimit);
 	void AddRunNumberCut(int lowLimit, int upLimit);
-	void Remove0EPSDEvents();
+	void Remove0EPSDEvents(ePSDModulCombinations ePSDMod);
+	void RemoveBadRuns();
     void AddPSDTimeStampCut(unsigned int maxOkSectionsWith0);
+	void AddBeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePlane slope);
 
 	void AddVtxTrackStatusCut();
 	void AddImpactPointCut();
@@ -234,13 +238,17 @@ private:
 	TH2D	*multS5Hist;
     TH1D	*totClusterHist, *verClusterHist, *gapClusterHist; //Ya pomenyal
     TH1D    *nBeamHist; //Ya pomenyal
+
+    TH2D    *BPD1XMultHist, *BPD1YMultHist,
+			*BPD2XMultHist, *BPD2YMultHist,
+            *BPD3XMultHist, *BPD3YMultHist,
+            *SlopeBeamXZHist, *SlopeBeamYZHist;
     
  //   TH3D    *acceptHist;
     
 	// --- counters
 	int nTracks;
 //    int nTracks1, nTracks0;
-    
 };
 
 class LRCHandler:public BaseHandler

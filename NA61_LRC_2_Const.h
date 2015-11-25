@@ -64,8 +64,9 @@ const double beamRapidity = 0.5*log((sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMom
 	(sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMomentum) - dBeamMomentum));
 
 enum eSystemType{pp, BeBe, ArSc, PbPb};
-const eSystemType systemType = BeBe;
+const eSystemType systemType = ArSc;
 enum eMyBPD{BPD1, BPD2, BPD3};
+enum eBeamSlopePlane{ZX,ZY};
 enum eTrigger{T1, T2};
 
 // Change it to your path
@@ -145,7 +146,7 @@ const double arXmaxPSDFluc[nBinsPSDFluc] = { 300.5, 1.5, 6500, 29.5 };
 // --- const for PSDHanler
 // iModule PSD energy
 const int nBinsPSDModules = nPSDModules + 1;
-const int arNBinsPSDModules[nBinsPSDModules] = {151,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
+const int arNBinsPSDModules[nBinsPSDModules] = {251,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
 
@@ -153,7 +154,7 @@ const double arXminPSDModules[nBinsPSDModules] = {-0.5,-10,-10,-10,-10,-10,-10,-
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10};
-const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {150.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
+const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {250.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
                                                   1200,1200,1200};
@@ -217,3 +218,10 @@ const int arRunsWith0EnergyInOnePSDModule[nRunsWith0EnergyInOnePSDModule] [2]= {
 		{20365, 29},
 		{20457, 44}
 };
+
+//Bad runs
+// -- ArSc
+// --- 150
+const int nBadRunsArSc150 = 10;
+const int arBadRunsArSc150[nBadRunsArSc150] = {20391, 20398,// problem with beam (signal in BPD)
+                                               20428, 20429, 20431, 20432, 20433, 20437, 20438, 20439}; // module 6 PSD

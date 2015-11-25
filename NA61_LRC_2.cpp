@@ -17,8 +17,8 @@
 *
 **************************************************************************************************************/
 
-//FIXME имена гистограмм psd а так же гистограммы катов.
-//FIXME не заходить в sim петлю если нет simHandlers
+//FIXME пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ psd пїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+//FIXME пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ sim пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ simHandlers
 
 
 #ifndef CONST
@@ -138,12 +138,15 @@ int main(int argc, char* argv[])
 		name = nameBasic + name2;
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
 /*		if (i==0 || i==1)
-			arOneWindHandler[i]->AddRunNumberCut(0,20445);
-		if (i==2 || i==3)
-			arOneWindHandler[i]->AddRunNumberCut(20445,20500);*/
+			arOneWindHandler[i]->AddRunNumberCut(0,20445);*/
+		if (i==0)
+			arOneWindHandler[i]->AddRunNumberCut(0,20380);
+        if (i==2)
+            arOneWindHandler[i]->AddRunNumberCut(20380,25380);
+
+		arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
 		arOneWindHandler[i]->AddStandardCutsRaw();
-//		if (i==1 || i==3)
-//			arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
+//		arOneWindHandler[i]->AddPSDEnergyCut(2500, e28Central);
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
@@ -200,7 +203,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerFlucPSDRaw[i]);
 	}
 
-	const int N3 =0;//21;
+	const int N3 =4;//21;
 	PtNFluctuationHandler* arHandlerEtaFlucPtNRaw[N3];
 	for (int i = 0; i<N3; i++){
 		TString name;
@@ -209,8 +212,13 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arHandlerEtaFlucPtNRaw[i] = new PtNFluctuationHandler(name + "Raw.root", false);
+
+        arHandlerEtaFlucPtNRaw[i]->AddRunNumberCut(0,20380);
+
+
 		arHandlerEtaFlucPtNRaw[i]->AddStandardCutsRaw();
-		arHandlerEtaFlucPtNRaw[i]->AddCentrality(0, 0.2);
+
+		arHandlerEtaFlucPtNRaw[i]->AddPSDEnergyCut(1850, e28Central);
 		//arHandlerEtaFlucPtNRaw[i]->AddEtaCut(2 + i*0.2, 2.5 + i*0.2);
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
@@ -276,7 +284,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arLRCHandler[i]);
 	}
 
-	const int N8 = 1;
+	const int N8 = 0;
 	PSDHandler* arPSDHandler[N8];
 	for (int i = 0; i<N8; i++){
 		TString name;
@@ -285,7 +293,7 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arPSDHandler[i] = new PSDHandler(name + "Raw.root", false);
-//		arPSDHandler[i]->AddRunNumberCut(0,20445);
+		arPSDHandler[i]->AddRunNumberCut(0,20380);
 	//	arPSDHandler[i]->AddPSDTimeStampCut(i+1);
 		arPSDHandler[i]->AddStandardCutsRaw();
 		HandList->AddHandler(arPSDHandler[i]);
@@ -341,9 +349,11 @@ void BaseHandler::AddStandardCutsRaw()
 {
 	this->Raw();
 	this->AddTrigger(T2);
-//	if (systemType == ArSc)
-//		if (beamMomentum == 150)
-//			this->AddPSDTimeStampCut(10);
+	if (systemType == ArSc)
+		if (beamMomentum == 150) {
+            this->RemoveBadRuns();
+            this->Remove0EPSDEvents(e28Central);
+        }
 //	this->AddTrigger(T1);
 	if (systemType == ArSc)
 		this->AddWFACut(-100, -200, 4);
@@ -357,10 +367,14 @@ void BaseHandler::AddStandardCutsRaw()
 		if (beamMomentum == 150) {
 //			this->AddDirectBPDCut(-0.45, -0.12, -0.1, 0.6, BPD1);
 //			this->AddDirectBPDCut(-0.15, 0.15, -0.37, -0.01, BPD3);
+	 //   	this->AddDirectBPDCut(-10, 0.08, -10,10, BPD3);
+		//	this->AddDirectBPDCut(-10,-0.16,   -10,10, BPD1);
+	    //    this->AddBeamSlopeCut(-0.0002, -0.00014, ZY);
+
 			this->AddZVtxCut(-589.7, -569.7);
-//			this->AddPSDEnergyCut(2370, e16Central);
-//			this->AddPSDEnergyCut(800, 5000, e28Periferal);
-//			this->AddS5Cut(80);
+			this->AddPSDEnergyCut(2800, e16Central);
+			this->AddPSDEnergyCut(800, 5000, e28Periferal);
+			this->AddS5Cut(100);
 		}
 		if (beamMomentum == 13)
 			this->AddZVtxCut(-590, -570);

@@ -134,8 +134,14 @@ OneWindHandler::~OneWindHandler()
     gapClusterHist->Write(); //Ya pomenyal
     
     nBeamHist->Write(); //Ya pomenyal
-	
-	cout<<nameOutFile<<endl;
+
+    BPD1XMultHist->Write();  BPD1YMultHist->Write();
+	BPD2XMultHist->Write();  BPD2YMultHist->Write();
+    BPD3XMultHist->Write();  BPD3YMultHist->Write();
+	SlopeBeamXZHist->Write();
+	SlopeBeamYZHist->Write();
+
+    cout<<nameOutFile<<endl;
 	cout<<"nEvent:  "<<multHist->GetEntries()<<endl;
 	cout<<"nTracks: "<<etaptHist->GetEntries()<<endl<<endl;
 	
@@ -195,9 +201,9 @@ void OneWindHandler::Init()
     ptPhiHist0		= new TH2D("ptPhi_cloud0_"+name,"ptPhi_cloud0_"+name+	"; phi;Pt;entries (-)",		150,-3.5,3.5, 300,0,1.5);//!
     ptPhiHist1		= new TH2D("ptPhi_cloud1_"+name,"ptPhi_cloud1_"+name+	"; phi;Pt;entries (+)",		150,-3.5,3.5, 300,0,1.5);//!
 	
-	BPD1Hist = new TH2D("BPD1_cloud_" + name, "BPD1_cloud_" + name + "; b_x [cm]; b_y [cm]; entries", 100, -2, 2, 100, -2, 2); //!
-	BPD2Hist = new TH2D("BPD2_cloud_" + name, "BPD2_cloud_" + name + "; b_x [cm]; b_y [cm]; entries", 100, -2, 2, 100, -2, 2);
-	BPD3Hist = new TH2D("BPD3_cloud_" + name, "BPD3_cloud_" + name + "; b_x [cm]; b_y [cm]; entries", 100, -2, 2, 100, -2, 2);
+	BPD1Hist = new TH2D("BPD1_cloud_" + name, "BPD1_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2); //!
+	BPD2Hist = new TH2D("BPD2_cloud_" + name, "BPD2_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2);
+	BPD3Hist = new TH2D("BPD3_cloud_" + name, "BPD3_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2);
 	ImpParHist 		= new TH2D("ImpPar_"+name,"ImpPar_"+name+ 				"; b_x [cm]; b_y [cm]; entries", 400, -5, 5, 400, -5, 5); //Ya pomenyal (sdelal poshire dlya QA plots)
 	
 	WFAHist 	= new TH1D("WFA_"+ name,"WFA_"+ name+ ";time [ns]; entries",			251,	-30000,	30000); //Ya pomenyal
@@ -248,6 +254,17 @@ void OneWindHandler::Init()
 	phiHist		= new TH1D("phiHist_" +name,"phiHist_" +name+";phi;entries",			150,	-3.5,	3.5);
 	phiHist0	= new TH1D("phiHist0_"+name,"phiHist0_"+name+";phi;entries (-)",	150,	-3.5,	3.5);	phiHist0->SetLineColor(kBlue);
 	phiHist1	= new TH1D("phiHist1_"+name,"phiHist1_"+name+";phi;entries (+)",	150,	-3.5,	3.5);	phiHist1->SetLineColor(kRed);
+
+    BPD1XMultHist = new TH2D("BPD1X_Mult_cloud_" + name, "BPD1X_Mult_cloud_" + name + "; N; x [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+    BPD1YMultHist = new TH2D("BPD1Y_Mult_cloud_" + name, "BPD1Y_Mult_cloud_" + name + "; N; y [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+	BPD2XMultHist = new TH2D("BPD2X_Mult_cloud_" + name, "BPD2X_Mult_cloud_" + name + "; N; x [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+	BPD2YMultHist = new TH2D("BPD2Y_Mult_cloud_" + name, "BPD2Y_Mult_cloud_" + name + "; N; y [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+	BPD3XMultHist = new TH2D("BPD3X_Mult_cloud_" + name, "BPD3X_Mult_cloud_" + name + "; N; x [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+    BPD3YMultHist = new TH2D("BPD3Y_Mult_cloud_" + name, "BPD3Y_Mult_cloud_" + name + "; N; y [cm]; entries", 301,	-0.5,	300.5, 50, -2, 2);
+
+	SlopeBeamXZHist = new TH2D("BeamSlopeXZ_Mult_cloud_" + name, "BeamSlopeXZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
+	SlopeBeamYZHist = new TH2D("BeamSlopeYZ_Mult_cloud_" + name, "BeamSlopeYZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
+
 }
 
 
@@ -439,22 +456,32 @@ void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 void OneWindHandler::EndOfEvent(Event& ev)
 {
 	if (init==false) {this->Init();}
-	multHist->Fill(nTracks0 + nTracks1);
+    double N = nTracks0 + nTracks1;
+	multHist->Fill(N);
 //    plusminusHist -> Fill(nTracks0,nTracks1);
  
 	
     
 	bEventInfoFull = false;
 	fitVtxHist	->Fill(myEventInfo.myFitVtxZ);
-	fitVtxNHist->Fill(myEventInfo.myFitVtxZ, nTracks0 + nTracks1); //Ya pomenyal
+	fitVtxNHist->Fill(myEventInfo.myFitVtxZ, N); //Ya pomenyal
 	BPD1Hist	->Fill(myEventInfo.myBPD[0],myEventInfo.myBPD[1]);
 	BPD2Hist	->Fill(myEventInfo.myBPD[2],myEventInfo.myBPD[3]);
 	BPD3Hist	->Fill(myEventInfo.myBPD[4],myEventInfo.myBPD[5]);
 	psdEnergyHist->Fill(myEventInfo.myEnergyPSD);
-    
-	psdEnergyNHist->Fill(myEventInfo.myEnergyPSD, nTracks0 + nTracks1); 
+    BPD1XMultHist -> Fill(N,myEventInfo.myBPD[0]);
+    BPD1YMultHist -> Fill(N,myEventInfo.myBPD[1]);
+    BPD2XMultHist -> Fill(N,myEventInfo.myBPD[2]);
+    BPD2YMultHist -> Fill(N,myEventInfo.myBPD[3]);
+    BPD3XMultHist -> Fill(N,myEventInfo.myBPD[4]);
+    BPD3YMultHist -> Fill(N,myEventInfo.myBPD[5]);
+
+    SlopeBeamXZHist ->Fill(N, myEventInfo.myBeamSlopeZX);
+    SlopeBeamYZHist ->Fill(N, myEventInfo.myBeamSlopeZY);
+
+	psdEnergyNHist->Fill(myEventInfo.myEnergyPSD, N);
 	psdEnergyS5Hist->Fill(myEventInfo.myEnergyPSD, myEventInfo.myS5ADC);
-	multS5Hist->Fill(myEventInfo.myS5ADC, nTracks0 + nTracks1);
+	multS5Hist->Fill(myEventInfo.myS5ADC, N);
     
     nBeamHist->Fill(myEventInfo.myTimeStructureWFA.size()); //Ya pomenyal
     for (unsigned int i = 0; i < myEventInfo.myTimeStructureWFA.size(); ++i){ //Ya pomenyal
@@ -937,10 +964,15 @@ void BaseHandler::AddZVtxCut()
     myEventCutList->AddCut(A);
 }
 
-void BaseHandler::Remove0EPSDEvents()
+void BaseHandler::Remove0EPSDEvents(ePSDModulCombinations ePSDMod)
 {
-	Cut* A = new RunWith0EnergyInOneModuleCutVer2(bRaw);
+	Cut* A = new RunWith0EnergyInOneModuleCutVer2(bRaw, ePSDMod);
 	myEventCutList->AddCut(A);
+}
+void BaseHandler::RemoveBadRuns()
+{
+    Cut* A = new BadRunCut(bRaw);
+    myEventCutList->AddCut(A);
 }
 
 void BaseHandler::AddZVtxCut(double_t minZ, double_t maxZ)
@@ -1159,7 +1191,11 @@ void BaseHandler::AddStrangeCut()
     myTrackCutList->AddCut(cut);
 }
 
-
+void BaseHandler::AddBeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePlane slope)
+{
+	Cut* A = new BeamSlopeCut(minSlope, maxSlope, slope, bRaw);
+	myEventCutList->AddCut(A);
+}
 
 void LRCHandler::AddPhiForward(double_t minPhi, double_t maxPhi)
 {
@@ -1234,6 +1270,8 @@ void StatEventInfo::Reset()
 		myFitVtxZ = 0;
 		for (int i = 0; i<6; i++) 
 			myBPD[i] = 0;
+        myBeamSlopeZX = 0;
+        myBeamSlopeZY = 0;
 		myEnergyPSD = 0;
         myTimeStructureWFA.push_back(100); //Ya pomenyal
 		myReset = true;
@@ -1282,6 +1320,9 @@ void StatEventInfo::DissectEvent(Event &event)
 		PSD& psd = pRecEvent->GetPSD();
 		for (int i=0; i<nPSDMods; i++)
 			myEnergyPSD = myEnergyPSD + psd.GetModule(i+1).GetEnergy();
+
+        myBeamSlopeZX = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetSlope();
+        myBeamSlopeZY = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetSlope();
 
 		myRunNumber = event.GetEventHeader().GetRunNumber();
 
@@ -2044,12 +2085,12 @@ void PSDHandler::Init()
     TString name = "PSDModules_" + myEventCutList->GetName()+ myTrackCutList->GetName() + string1;
     myNameHist = name;
 
-	double* arXMax;
+    const double* arXMax;
 	switch (systemType){
 		case ArSc:
 			arXMax = arXmaxPSDModulesArSc150;
 			break;
-		case BeB:
+		case BeBe:
 			arXMax = arXmaxPSDModulesBeBe150;
 			break;
 		default:

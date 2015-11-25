@@ -257,7 +257,10 @@ TH1F* CutList::GetStatHist(TString topName, bool bSim)
 			currentCut = current -> GetValue(0);
 		//	cout<<currentCut->GetName()<<endl;
 			histStat->SetBinContent(iBin, currentCut->GetNEntries());
-			histStat->GetXaxis()->SetBinLabel(iBin,currentCut->GetName());
+			char name2[50];
+			sprintf(name2, "%i_",iBin);
+			TString name3 = name2;
+			histStat->GetXaxis()->SetBinLabel(iBin, name3+currentCut->GetName());
 		} while(current -> myNext !=0);
 	}else{
 		histStat = new TH1F("SimStatCutHist"+topName , "Sim"+topName + ";cuts;entries", 10, -0.5, 10+0.5);

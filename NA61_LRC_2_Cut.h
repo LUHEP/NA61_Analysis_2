@@ -565,7 +565,7 @@ private:
 class RunWith0EnergyInOneModuleCutVer2 : public EventCut
 {
 public:
-    RunWith0EnergyInOneModuleCutVer2(bool bRaw);
+    RunWith0EnergyInOneModuleCutVer2(bool bRaw, ePSDModulCombinations ePSDSet);
     ~RunWith0EnergyInOneModuleCutVer2(){};
     bool CheckEvent(Event& event, bool bSim);
     TString GetShortNameWithPar();
@@ -573,6 +573,8 @@ public:
 private:
     RunWith0EnergyInOneModuleCutVer2();
     bool myBRaw;
+    ePSDModulCombinations myPSDModSet;
+    bool myPSDModArray[45];
 
 };
 
@@ -588,4 +590,36 @@ private:
     PSDTimeStampCut();
     bool myBRaw;
     unsigned int myMaxOkNSectionsWith0;
+};
+
+class BadRunCut : public EventCut
+{
+
+public:
+    BadRunCut(bool bRaw);
+    ~BadRunCut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    BadRunCut();
+    bool myBRaw;
+    const int* myArBadRuns;
+    int myNBadRuns;
+};
+
+class BeamSlopeCut : public EventCut
+{
+public:
+    BeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePlane plane, bool bRaw);
+    ~BeamSlopeCut() {}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    BeamSlopeCut();
+    bool myBRaw;
+    double myMinSlope;
+    double myMaxSlope;
+    eBeamSlopePlane myPlane;
 };

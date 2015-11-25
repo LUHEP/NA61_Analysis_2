@@ -246,7 +246,7 @@ bool BPDCut::CheckEvent(Event& event, bool bSim)
 	if (bSim == false){
 	//	RecEvent* pRecEvent= event.GetRecEvent();
 		const int beamStatus =  event.GetRecEvent().GetBeam().GetStatus();
-		if (beamStatus && (BeamConst::eNotFitted||BeamConst::eBadBPD3)){
+		if (beamStatus & (BeamConst::eNotFitted|BeamConst::eBadBPD3)){ //бинное и
 		//	cout<<"beamStatus: "<<beamStatus<<endl;
 			return 0;
 		}
@@ -283,8 +283,23 @@ DirectBPDCut::DirectBPDCut(double minX, double maxX, double minY, double maxY, e
 	myMinY = minY;
 	myMaxY = maxY;
 	myBPD = bpd;
-	my_Name = "Direct_BPD";
-	my_Short_Name = "DirBPD";
+	TString name;
+	switch (bpd){
+		case BPD1:
+			name = "1";
+			break;
+		case  BPD2:
+			name = "2";
+			break;
+		case BPD3:
+			name = "3";
+			break;
+		default:
+			name = "NONAME";
+			break;
+	}
+	my_Name = "Direct_BPD" + name;
+	my_Short_Name = "DirBPD" + name;
 }
 
 bool DirectBPDCut::CheckEvent(Event& event, bool bSim)
@@ -1902,11 +1917,61 @@ bool RunWith0EnergyInOneModuleCut::CheckEvent(Event &event, bool bSim)
 	return true;
 }
 
-RunWith0EnergyInOneModuleCutVer2::RunWith0EnergyInOneModuleCutVer2(bool bRaw)
+RunWith0EnergyInOneModuleCutVer2::RunWith0EnergyInOneModuleCutVer2(bool bRaw, ePSDModulCombinations ePSDSet)
 {
     myBRaw = bRaw;
-    my_Name = "Zero_Energy_PSD_module";
-    my_Short_Name = "ZeroEPSD";
+	TString name;
+	switch (ePSDSet)
+	{
+		case e28Central:
+			for (int i = 1; i < 29; i++)
+				myPSDModArray[i] = 1;
+			name = "28Central";
+			break;
+		case e16Central:
+			for (int i = 1; i < 17; i++)
+				myPSDModArray[i] = 1;
+			name = "16Central";
+			break;
+		case e28Periferal:
+			for (int i = 17; i < 45; i++)
+				myPSDModArray[i] = 1;
+			name = "28Periferal";
+			break;
+		case e6Module:
+			myPSDModArray[6] = 1;
+			name = "6Module";
+			break;
+		case e8Module:
+			myPSDModArray[8] = 1;
+			name = "8Module";
+			break;
+		case e10Module:
+			myPSDModArray[10] = 1;
+			name = "10Module";
+			break;
+		case e11Module:
+			myPSDModArray[11] = 1;
+			name = "11Module";
+			break;
+		case e29Module:
+			myPSDModArray[29] = 1;
+			name = "29Module";
+			break;
+		case e44Module:
+			myPSDModArray[44] = 1;
+			name = "44Module";
+			break;
+		case eAll:;
+		default:
+			for (int i = 1; i < 45; i++)
+				myPSDModArray[i] = 1;
+			name = "All";
+			break;
+	}
+	my_Name = "Zero_Energy_PSD_module_"+ name;
+	my_Short_Name = "ZeroEPSD_" + name;
+
 }
 
 TString RunWith0EnergyInOneModuleCutVer2::GetShortNameWithPar()
@@ -1921,8 +1986,9 @@ bool RunWith0EnergyInOneModuleCutVer2::CheckEvent(Event &event, bool bSim)
     RecEvent *pRecEvent = &event.GetRecEvent();
     PSD &psd = pRecEvent->GetPSD();
     for (int i = 0; i < nPSDModules; i++) {
-        if (psd.GetModule(i+1).GetEnergy() == 0)
-            return false;
+		if (myPSDModArray[i])
+        	if (psd.GetModule(i+1).GetEnergy() == 0)
+            	return false;
     }
     myNEntries++;
     return true;
@@ -1966,3 +2032,85 @@ bool PSDTimeStampCut::CheckEvent(Event &event, bool bSim)
     myNEntries++;
     return true;
 }
+
+BadRunCut::BadRunCut(bool bRaw)
+{
+    myBRaw = bRaw;
+    my_Name = "BadRuns";
+    my_Short_Name = "BudRuns";
+    if (systemType != ArSc) myBRaw = false;
+    if (beamMomentum != 150) myBRaw = false;
+    if (myBRaw){
+        myNBadRuns = nBadRunsArSc150;
+        myArBadRuns = arBadRunsArSc150;
+    }
+}
+
+TString BadRunCut::GetShortNameWithPar()
+{
+    return my_Short_Name;
+}
+
+bool BadRunCut::CheckEvent(Event &event, bool bSim)
+{
+    if (myBRaw = false)
+        return true;//notrhing to do
+    int runNumber = event.GetEventHeader().GetRunNumber();
+    for (int i = 0; i<myNBadRuns; i++)
+        if (runNumber == myArBadRuns[i])
+            return false;
+    myNEntries++;
+    return true;
+}
+
+BeamSlopeCut::BeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePlane plane, bool bRaw){
+	myBRaw = bRaw;
+	my_Name = "BeamSlope";
+	my_Short_Name = "BeamSlope";
+	myMaxSlope = maxSlope;
+	myMinSlope = minSlope;
+	myPlane = plane;
+}
+
+TString BeamSlopeCut::GetShortNameWithPar()
+{
+	TString name;
+	char name2[50];
+	sprintf(name2, "_%f_%f", myMinSlope, myMaxSlope);
+	name = my_Short_Name + name2;
+	switch (myPlane){
+		case ZX:
+			name = name + "ZX";
+			break;
+		case ZY:
+			name = name + "ZY";
+			break;
+		default:
+			break;
+	}
+	return name;
+}
+
+bool BeamSlopeCut::CheckEvent(Event &event, bool bSim)
+{
+    double slope;
+    switch (myPlane){
+        case ZX:
+            slope = event.GetRecEvent().GetBeam().Get(det::BPDConst::eX).GetSlope();
+            break;
+        case ZY:
+            slope = event.GetRecEvent().GetBeam().Get(det::BPDConst::eY).GetSlope();
+            break;
+        default:
+            break;
+    }
+
+    if ((slope>myMaxSlope)||(slope<myMinSlope))
+        return 0;
+    myNEntries++;
+    return 1;
+}
+
+
+
+
