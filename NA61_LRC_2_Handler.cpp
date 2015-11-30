@@ -140,6 +140,21 @@ OneWindHandler::~OneWindHandler()
     BPD3XMultHist->Write();  BPD3YMultHist->Write();
 	SlopeBeamXZHist->Write();
 	SlopeBeamYZHist->Write();
+	BeamPositionHistPSDLevelHist->Write();
+	VtxTracksVsAllTracksHist->Write();
+    BadGoodRationHist->Write();
+
+    BPD3XSignalNVtxTracks ->Write();
+    BPD3YSignalNVtxTracks->Write();
+    BPD3XSignalPSD44->Write();
+    BPD3YSignalPSD44->Write();
+    PSD16c28p->Write();
+
+    BPD3SignalRatioXTrackRatio ->Write();
+    BPD3SignalRatioYTrackRatio->Write();
+    BPD3SignalDifXTrackRatio->Write();
+    BPD3SignalDifYTrackRatio->Write();
+
 
     cout<<nameOutFile<<endl;
 	cout<<"nEvent:  "<<multHist->GetEntries()<<endl;
@@ -264,6 +279,32 @@ void OneWindHandler::Init()
 
 	SlopeBeamXZHist = new TH2D("BeamSlopeXZ_Mult_cloud_" + name, "BeamSlopeXZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
 	SlopeBeamYZHist = new TH2D("BeamSlopeYZ_Mult_cloud_" + name, "BeamSlopeYZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
+	BeamPositionHistPSDLevelHist = new TH2D("Beam_PSD_level" + name, "Beam_PSD_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
+
+	VtxTracksVsAllTracksHist = new TH2D("VtxTrVsAllTrack"+name,"VtxTrVsAllTrack" + name + "vtxTracks; GoodTracks; BadTracks",301,	-0.5,	300.5, 601,	-0.5,	600.5);
+
+    BadGoodRationHist = new TH1D("BadGoodRation"+name,"BadGoodRation" + name + "vtxTracks;  BadTracks/GoodTracks",100,	0,	10);
+
+    BPD3XSignalNVtxTracks = new TH2D("BPD3XSignalNVtxTracks_"+name, "BPD3XSignalNVtxTracks" + name+"; BPD3XSignal; NTracksUsedForFitMainVtx",
+                                     300, 0, 15000, 300, -0.5, 300);
+    BPD3YSignalNVtxTracks = new TH2D("BPD3YSignalNVtxTracks_"+name, "BPD3XSignalNVtxTracks" + name+"; BPD3YSignal; NTracksUsedForFitMainVtx",
+                                     300, 0, 15000, 300, -0.5, 300);
+    BPD3XSignalPSD44 = new TH2D("BPD3XSignalPSD44_"+name, "BPD3XSignalPSD44" + name+"; BPD3XSignal; PSD(44)",
+                                     300, 0, 15000, 300, 0, 10000);
+    BPD3YSignalPSD44 = new TH2D("BPD3YSignalPSD44_"+name, "BPD3XSignalPSD44" + name+"; BPD3YSignal; PSD(44)",
+                                     300, 0, 15000, 300, 0, 10000);
+
+    PSD16c28p = new TH2D("PSD16c28p_"+name, "PSD16c28p" + name+"; PSD(16central); PSD(28per))",
+                                          300, 0, 6000, 300, 0, 5000);
+
+    BPD3SignalRatioXTrackRatio = new TH2D ("BPD3SignalRatioXTrackRatio_"+ name,"BPD3SignalRatioXTrackRatio"+name+
+            ";BPD3ClusterSignalX/BPD3SumAllX; VertexTrack/Track",100,0,1,100,0,1);
+    BPD3SignalRatioYTrackRatio= new TH2D ("BPD3SignalRatioYTrackRatio_"+ name,"BPD3SignalRatioYTrackRatio"+name+
+            ";BPD3ClusterSignalY/BPD3SumAllY; VertexTrack/Track",100,0,1,100,0,1);
+    BPD3SignalDifXTrackRatio = new TH2D ("BPD3SignalDifXTrackRatio_"+ name,"BPD3SignalDifXTrackRatio"+name+
+            ";BPD3SumAllX - BPD3ClusterSignalX; VertexTrack/Track",300,0,15000,100,0,1);
+    BPD3SignalDifYTrackRatio = new TH2D ("BPD3SignalDifYTrackRatio_"+ name,"BPD3SignalDifYTrackRatio"+name+
+            ";BPD3SumAllY - BPD3ClusterSignalY; VertexTrack/Track",300,0,15000,100,0,1);
 
 }
 
@@ -372,6 +413,9 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
     totClusterHist->Fill(nTotalTPC); //Ya pomenyal
     verClusterHist->Fill(nVTPC); //Ya pomenyal
     gapClusterHist->Fill(nGTPC); //Ya pomenyal
+
+
+
     
 }
 
@@ -478,6 +522,7 @@ void OneWindHandler::EndOfEvent(Event& ev)
 
     SlopeBeamXZHist ->Fill(N, myEventInfo.myBeamSlopeZX);
     SlopeBeamYZHist ->Fill(N, myEventInfo.myBeamSlopeZY);
+	BeamPositionHistPSDLevelHist->Fill(myEventInfo.myBeamPositionAtPSDX, myEventInfo.myBeamPositionAtPSDY);
 
 	psdEnergyNHist->Fill(myEventInfo.myEnergyPSD, N);
 	psdEnergyS5Hist->Fill(myEventInfo.myEnergyPSD, myEventInfo.myS5ADC);
@@ -487,8 +532,36 @@ void OneWindHandler::EndOfEvent(Event& ev)
     for (unsigned int i = 0; i < myEventInfo.myTimeStructureWFA.size(); ++i){ //Ya pomenyal
         WFAHist->Fill(myEventInfo.myTimeStructureWFA.at(i)-(wfaTime1 + wfaTime2) / 2.); //Ya pomenyal
     }; //Ya pomenyal
-    
-    
+
+
+    double nTracks = 0;
+    RecEvent recEvent = ev.GetRecEvent();
+
+    for (std::list<rec::Track>::const_iterator trackIter = recEvent.Begin<rec::Track>();
+         trackIter != recEvent.End<rec::Track>(); ++trackIter)
+    {
+        const rec::Track& track = *trackIter;
+        nTracks++;
+        // if you want to modify track, do (recEvent may not be const)
+       // rec::Track& mutableTrack = recEvent.Get(track.GetIndex());
+    }
+    N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
+    VtxTracksVsAllTracksHist -> Fill(N,nTracks/*-N*/);
+    if (N<50)
+        BadGoodRationHist->Fill((nTracks/*-N*/)/N);
+
+    BPD3XSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalX,N);
+    BPD3YSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalY,N);
+    BPD3XSignalPSD44->Fill(myEventInfo.myBPD3SignalX,myEventInfo.myEnergyPSD44);
+    BPD3YSignalPSD44->Fill(myEventInfo.myBPD3SignalY,myEventInfo.myEnergyPSD44);
+    PSD16c28p->Fill(myEventInfo.myEnergyPSD16, myEventInfo.myEnergyPSD28per);
+
+    BPD3SignalRatioXTrackRatio ->Fill(myEventInfo.myBPD3SignalX / myEventInfo.myBPD3SumAllX,N/nTracks);
+    BPD3SignalRatioYTrackRatio ->Fill(myEventInfo.myBPD3SignalY / myEventInfo.myBPD3SumAllY,N/nTracks);
+    BPD3SignalDifXTrackRatio ->Fill(myEventInfo.myBPD3SumAllX - myEventInfo.myBPD3SignalX ,N/nTracks);
+    BPD3SignalDifYTrackRatio ->Fill(myEventInfo.myBPD3SumAllX - myEventInfo.myBPD3SignalX,N/nTracks);
+
+
     nTracks0=0; //Ya pomenyal
     nTracks1=0; //Ya pomenyal
 }
@@ -1259,8 +1332,44 @@ void BaseHandler::AddPSDTimeStampCut(unsigned int maxOkSectionsWith0)
 {
     Cut* A = new PSDTimeStampCut(bRaw, maxOkSectionsWith0);
     myEventCutList->AddCut(A);
-
 }
+
+void BaseHandler::AddNTrackCut(int min, int max)
+{
+    Cut* A = new NTracksCut(min,max);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddNFittedVtxTrackCut(int min, int max)
+{
+    Cut* A = new NFittedVtxTracksCut(min,max);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddTrackVtxFittedTrackRatioCut(double minRatio)
+{
+    Cut* A = new TrackVtxFittedTrackRatioCut(minRatio);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddLocalRatioCut(double minRatio, int minBoundOfUsing, int maxBoundOfUsing)
+{
+    Cut* A = new TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds(minRatio,minBoundOfUsing, maxBoundOfUsing);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddBPD3ClusterSignalCut(double minX, double maxX, double minY, double maxY)
+{
+    Cut* A = new BPD3InteractionCut(minX, maxX, minY, maxY, bRaw);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddStrongPBDCut()
+{
+	Cut* A = new StrongBPDCut();
+	myEventCutList->AddCut(A);
+}
+
 
 void StatEventInfo::Reset()
 {
@@ -1272,11 +1381,20 @@ void StatEventInfo::Reset()
 			myBPD[i] = 0;
         myBeamSlopeZX = 0;
         myBeamSlopeZY = 0;
+		myBeamPositionAtPSDX = 0;
+		myBeamPositionAtPSDY = 0;
 		myEnergyPSD = 0;
         myTimeStructureWFA.push_back(100); //Ya pomenyal
 		myReset = true;
 		myRunNumber = 0;
 		myS5ADC = 0;
+        myBPD3SignalX = 0;
+        myBPD3SignalY = 0;
+        myBPD3SumAllX = 0;
+        myBPD3SumAllY = 0;
+        myEnergyPSD44 = 0;
+        myEnergyPSD16 = 0;
+        myEnergyPSD28per = 0;
 	}
 }
 
@@ -1321,14 +1439,30 @@ void StatEventInfo::DissectEvent(Event &event)
 		for (int i=0; i<nPSDMods; i++)
 			myEnergyPSD = myEnergyPSD + psd.GetModule(i+1).GetEnergy();
 
+        for (int i =0; i<44; i++)
+            myEnergyPSD44 = myEnergyPSD44 + psd.GetModule(i+1).GetEnergy();
+        for (int i =0; i<16; i++)
+            myEnergyPSD16 = myEnergyPSD16  + psd.GetModule(i+1).GetEnergy();
+        for (int i =16; i<44; i++)
+            myEnergyPSD28per = myEnergyPSD28per + psd.GetModule(i+1).GetEnergy();
+
         myBeamSlopeZX = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetSlope();
         myBeamSlopeZY = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetSlope();
+		myBeamPositionAtPSDX = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(2200 - 580);
+		myBeamPositionAtPSDY = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(2200 - 580);
 
 		myRunNumber = event.GetEventHeader().GetRunNumber();
 
 		myS5ADC = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
-		
+
+        myBPD3SignalX = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetCharge();
+        myBPD3SignalY = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetCharge();
+
+        myBPD3SumAllX = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetSumOfAll();
+        myBPD3SumAllY = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetSumOfAll();
+
 		myReset = false;
+
 	}
 }
 
@@ -2137,3 +2271,4 @@ void PSDHandler::EndOfEvent(Event & ev) {
     nTracks0 = 0;
     nTracks1 = 0;
 }
+

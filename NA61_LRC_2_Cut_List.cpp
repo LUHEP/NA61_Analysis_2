@@ -188,9 +188,12 @@ bool CutList::EventTest(Event& ev, bool bSim)
 	if (bSim) type = SIM;
 	else type = REC;
 	checking currentCutStatus;
+	int i = 0;
 	while(true){
+//		cout<<"EventTest: "<<i++<<endl;
 		pCut = current->GetValue(0);
 		currentCutStatus = eventCutChecking.CheckCut(pCut->GetShortNameWithPar(),type);
+
 		if (currentCutStatus == fail)
 			return false;
 		if (currentCutStatus == pass){
@@ -212,7 +215,6 @@ bool CutList::EventTest(Event& ev, bool bSim)
 				pCut->SetMultiplicity(multiplicity);
 //				cout << "set_mult" << endl;
 			}
-
 			res = pCut->CheckEvent(ev, bSim);
 			if (res == true) 
 				eventCutChecking.CheckedCut(pCut->GetShortNameWithPar(),type, pass);

@@ -70,7 +70,7 @@ public:
     virtual bool CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack) {}
     virtual TString GetName() {return my_Name;}
 	virtual TString GetShortName() {return my_Short_Name;}
-	virtual TString GetShortNameWithPar() {}
+	virtual TString GetShortNameWithPar() {return my_Short_Name;}
     int GetNEntries() {return myNEntries;}
 	void nEntriesPlusPlus() {myNEntries++;}
 	void nEntriesMinusMinus() { myNEntries--; }
@@ -86,7 +86,7 @@ protected:
 class EventCut:public Cut
 {
 public:
-    EventCut();
+    EventCut(){}
     virtual ~EventCut(){}
     virtual bool CheckEvent(Event& event, bool bSim) {}
 	virtual TString GetShortNameWithPar() {}
@@ -623,3 +623,91 @@ private:
     double myMaxSlope;
     eBeamSlopePlane myPlane;
 };
+
+class BPD3InteractionCut : public EventCut
+{
+public:
+    BPD3InteractionCut(double minX, double maxX, double minY, double maxY, bool bRaw);
+    ~BPD3InteractionCut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    BPD3InteractionCut();
+    bool myBRaw;
+    double myMinXValue;
+    double myMaxXValue;
+    double myMinYValue;
+    double myMaxYValue;
+};
+
+class NTracksCut : public EventCut //all tracks
+{
+public:
+    NTracksCut(int min, int max);
+    ~NTracksCut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    NTracksCut();
+    int myNMin;
+    int myNMax;
+};
+
+class NFittedVtxTracksCut : public EventCut //tracks which were used for fitting main vtx
+{
+public:
+    NFittedVtxTracksCut(int min, int max);
+    ~NFittedVtxTracksCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    NFittedVtxTracksCut();
+    int myNMin;
+    int myNMax;
+};
+
+class TrackVtxFittedTrackRatioCut : public EventCut //ratio of tracks which were used for fitting main vtx, to all tracks
+{
+public:
+    TrackVtxFittedTrackRatioCut(double minRatio);
+    ~TrackVtxFittedTrackRatioCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    TrackVtxFittedTrackRatioCut();
+    double myMinRatio;
+};
+
+class TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds : public EventCut // merging of two previous cuts
+{
+public:
+    TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds(double minRatio, int min, int max);
+    ~TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds();
+    double myMinRatio;
+    int myNMin;
+    int myNMax;
+};
+
+class  StrongBPDCut:public EventCut
+{
+public:
+    StrongBPDCut();
+    ~StrongBPDCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+};
+
+
+
+
+
+
+
+
+
+

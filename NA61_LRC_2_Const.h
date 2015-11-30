@@ -222,6 +222,6 @@ const int arRunsWith0EnergyInOnePSDModule[nRunsWith0EnergyInOnePSDModule] [2]= {
 //Bad runs
 // -- ArSc
 // --- 150
-const int nBadRunsArSc150 = 10;
-const int arBadRunsArSc150[nBadRunsArSc150] = {20391, 20398,// problem with beam (signal in BPD)
+const int nBadRunsArSc150 = 13;
+const int arBadRunsArSc150[nBadRunsArSc150] = {20391, 20398,20415, 20416, 20417,// problem with beam (signal in BPD)
                                                20428, 20429, 20431, 20432, 20433, 20437, 20438, 20439}; // module 6 PSD

@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 1;
+	const int N0 = 2;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -139,13 +139,17 @@ int main(int argc, char* argv[])
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
 /*		if (i==0 || i==1)
 			arOneWindHandler[i]->AddRunNumberCut(0,20445);*/
-		if (i==0)
-			arOneWindHandler[i]->AddRunNumberCut(0,20380);
-        if (i==2)
-            arOneWindHandler[i]->AddRunNumberCut(20380,25380);
+//		if (i==0)
+//			arOneWindHandler[i]->AddRunNumberCut(0,20380);
+ //       if (i==1)
+  //          arOneWindHandler[i]->AddRunNumberCut(20380,25380);
 
-		arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
+//		arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
 		arOneWindHandler[i]->AddStandardCutsRaw();
+        //arOneWindHandler[i]->AddLocalRatioCut(0.25,0,50);
+        if (i==1)
+            //arOneWindHandler[i]->AddNTrackCut(450,900);
+			arOneWindHandler[i]->AddStrongPBDCut();
 //		arOneWindHandler[i]->AddPSDEnergyCut(2500, e28Central);
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
@@ -203,7 +207,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerFlucPSDRaw[i]);
 	}
 
-	const int N3 =4;//21;
+	const int N3 =0;//21;
 	PtNFluctuationHandler* arHandlerEtaFlucPtNRaw[N3];
 	for (int i = 0; i<N3; i++){
 		TString name;
@@ -375,6 +379,8 @@ void BaseHandler::AddStandardCutsRaw()
 			this->AddPSDEnergyCut(2800, e16Central);
 			this->AddPSDEnergyCut(800, 5000, e28Periferal);
 			this->AddS5Cut(100);
+			this->AddBPD3ClusterSignalCut(3200,8100,2500,7000);
+            this->AddTrackVtxFittedTrackRatioCut(0.25);
 		}
 		if (beamMomentum == 13)
 			this->AddZVtxCut(-590, -570);

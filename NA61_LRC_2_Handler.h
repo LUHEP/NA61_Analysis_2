@@ -72,10 +72,21 @@ public:
 	double_t myBPD[6];
     double_t myBeamSlopeZX;
     double_t myBeamSlopeZY;
+    double_t myBeamPositionAtPSDX;
+    double_t myBeamPositionAtPSDY;
 	double_t myEnergyPSD;
     vector<double> myTimeStructureWFA; //Ya pomenyal
 	unsigned int myRunNumber; 
 	double_t myS5ADC;
+
+    double_t myBPD3SignalX;
+    double_t myBPD3SignalY;
+    double_t myBPD3SumAllX;
+    double_t myBPD3SumAllY;
+    double_t myEnergyPSD44;
+    double_t myEnergyPSD16;
+    double_t myEnergyPSD28per;
+
 private:	
 	bool myReset;
 };
@@ -121,6 +132,7 @@ public:
 	void AddWFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut);
 	void AddChargeCut();
 	void AddBPDCut();
+	void AddStrongPBDCut();
 	void AddDirectBPDCut(double minX, double maxX, double minY, double maxY, eMyBPD bpd);
 	void AddMainVtxCut();
 	void AddFittedVtxCut();
@@ -141,6 +153,12 @@ public:
 	void RemoveBadRuns();
     void AddPSDTimeStampCut(unsigned int maxOkSectionsWith0);
 	void AddBeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePlane slope);
+    void AddBPD3ClusterSignalCut(double minX, double maxX, double minY, double maxY);
+    void AddNTrackCut(int min, int max);
+    void AddNFittedVtxTrackCut(int min, int max);
+    void AddTrackVtxFittedTrackRatioCut(double minRation);
+    void AddLocalRatioCut(double minRatio, int minBoundOfUsing, int maxBoundOfUsing);
+
 
 	void AddVtxTrackStatusCut();
 	void AddImpactPointCut();
@@ -242,8 +260,23 @@ private:
     TH2D    *BPD1XMultHist, *BPD1YMultHist,
 			*BPD2XMultHist, *BPD2YMultHist,
             *BPD3XMultHist, *BPD3YMultHist,
-            *SlopeBeamXZHist, *SlopeBeamYZHist;
-    
+            *SlopeBeamXZHist, *SlopeBeamYZHist,
+	*BeamPositionHistPSDLevelHist;
+
+	TH2D    *VtxTracksVsAllTracksHist;
+    TH1D    *BadGoodRationHist;
+
+    TH2D    *BPD3XSignalNVtxTracks;
+    TH2D    *BPD3YSignalNVtxTracks;
+    TH2D    *BPD3XSignalPSD44;
+    TH2D    *BPD3YSignalPSD44;
+    TH2D    *PSD16c28p;
+
+    TH2D    *BPD3SignalRatioXTrackRatio;
+    TH2D    *BPD3SignalRatioYTrackRatio;
+    TH2D    *BPD3SignalDifXTrackRatio;
+    TH2D    *BPD3SignalDifYTrackRatio;
+
  //   TH3D    *acceptHist;
     
 	// --- counters

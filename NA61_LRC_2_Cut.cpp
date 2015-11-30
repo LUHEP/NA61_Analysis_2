@@ -6,9 +6,7 @@
 #ifndef CONST
 #define CONST
 #include "NA61_LRC_2_Const.h" //FIXME
-#endif 
-
-EventCut::EventCut(){}
+#endif
 
 T2Cut::T2Cut()
 {
@@ -246,10 +244,10 @@ bool BPDCut::CheckEvent(Event& event, bool bSim)
 	if (bSim == false){
 	//	RecEvent* pRecEvent= event.GetRecEvent();
 		const int beamStatus =  event.GetRecEvent().GetBeam().GetStatus();
-		if (beamStatus & (BeamConst::eNotFitted|BeamConst::eBadBPD3)){ //бинное и
+		if (beamStatus /*!= 0){*/& (BeamConst::eNotFitted|BeamConst::eBadBPD3)){ //бинное и
 		//	cout<<"beamStatus: "<<beamStatus<<endl;
 			return 0;
-		}
+    }
 	} else {
 //		SimEvent* pSimEvent=&event.GetSimEvent();
 //		const int beamStatus =  pSimEvent->GetBeam().GetStatus();
@@ -1798,7 +1796,7 @@ S5Cut::S5Cut(double upLimit, bool bRaw)
 
 bool S5Cut::CheckEvent(Event& event, bool bSim)
 {
-	if (myBRaw = false)
+	if (myBRaw == false)
 		return true;//notrhing to do
 	double A = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
 	if (A < myUpLimit){
@@ -1829,7 +1827,7 @@ RunNumberCut::RunNumberCut(int lowLimit, int upLimit, bool bRaw)
 
 bool RunNumberCut::CheckEvent(Event &event, bool bSim)
 {
-	if (myBRaw = false)
+	if (myBRaw == false)
 		return true;//notrhing to do
 	int myRunNumber = event.GetEventHeader().GetRunNumber();
 	if ((myRunNumber > myUpLim) || (myRunNumber < myLowLim))
@@ -1898,7 +1896,7 @@ TString RunWith0EnergyInOneModuleCut::GetShortNameWithPar()
 
 bool RunWith0EnergyInOneModuleCut::CheckEvent(Event &event, bool bSim)
 {
-	if (myBRaw = false)
+	if (myBRaw == false)
 		return true;//notrhing to do
 	int runNumber = event.GetEventHeader().GetRunNumber();
     for (int i = 0; i < nRunsWith0EnergyInOnePSDModule; i++){
@@ -1981,7 +1979,7 @@ TString RunWith0EnergyInOneModuleCutVer2::GetShortNameWithPar()
 
 bool RunWith0EnergyInOneModuleCutVer2::CheckEvent(Event &event, bool bSim)
 {
-    if (myBRaw = false)
+    if (myBRaw == false)
         return true;//notrhing to do
     RecEvent *pRecEvent = &event.GetRecEvent();
     PSD &psd = pRecEvent->GetPSD();
@@ -2013,7 +2011,7 @@ TString PSDTimeStampCut::GetShortNameWithPar()
 
 bool PSDTimeStampCut::CheckEvent(Event &event, bool bSim)
 {
-    if (myBRaw = false)
+    if (myBRaw == false)
         return true;//notrhing to do
 
     RecEvent *pRecEvent = &event.GetRecEvent();
@@ -2043,6 +2041,8 @@ BadRunCut::BadRunCut(bool bRaw)
     if (myBRaw){
         myNBadRuns = nBadRunsArSc150;
         myArBadRuns = arBadRunsArSc150;
+
+
     }
 }
 
@@ -2053,7 +2053,7 @@ TString BadRunCut::GetShortNameWithPar()
 
 bool BadRunCut::CheckEvent(Event &event, bool bSim)
 {
-    if (myBRaw = false)
+    if (myBRaw == false)
         return true;//notrhing to do
     int runNumber = event.GetEventHeader().GetRunNumber();
     for (int i = 0; i<myNBadRuns; i++)
@@ -2112,5 +2112,199 @@ bool BeamSlopeCut::CheckEvent(Event &event, bool bSim)
 }
 
 
+BPD3InteractionCut::BPD3InteractionCut
+        (double minX, double maxX, double minY, double maxY, bool bRaw)
+{
+	myBRaw = bRaw;
+	my_Name = "BPD3Inter";
+	my_Short_Name = "BPD3Inter";
+	char name2[50];
+	sprintf(name2,"_%f_%f_%f_%f",minX,maxX,minY,maxY);
+	my_Short_Name = my_Short_Name + name2;
+	my_Name = my_Name + name2;
+   // cout<<name2<<endl;
+    //cout<<my_Name<<"  "<<my_Short_Name<<endl;
+    myMinXValue =minX;
+    myMinYValue =minY;
+    myMaxXValue =maxX;
+    myMaxYValue =maxY;
+}
 
+bool BPD3InteractionCut::CheckEvent(Event &event, bool bSim)
+{
+    if (myBRaw == false)
+        return true;//nothing to do
+    evt::rec::Beam beam = event.GetRecEvent().GetBeam();
+    double signalX = beam.GetBPDPlane(det::BPDConst::eBPD3x).GetCharge();
+    double signalY = beam.GetBPDPlane(det::BPDConst::eBPD3y).GetCharge();
+    if (myMaxXValue<signalX)
+        return false;
+    if (myMinXValue>signalX)
+        return false;
+    if (myMinYValue>signalY)
+        return false;
+    if (myMaxYValue<signalY)
+        return false;
+    myNEntries++;
+    return true;
+}
+
+NTracksCut::NTracksCut(int min, int max)
+{
+    myNMin = min;
+    myNMax = max;
+    char name2[50];
+    sprintf(name2,"_%i_%i",min,max);
+    my_Name = "N_track";
+    my_Name =my_Name + name2;
+    my_Short_Name = "NTrack";
+    my_Short_Name =my_Short_Name + name2;
+}
+
+bool NTracksCut::CheckEvent(Event &event, bool bSim)
+{
+    if (bSim) return true;
+
+    double nTracks = 0;
+    RecEvent recEvent = event.GetRecEvent();
+    for (std::list<rec::Track>::const_iterator trackIter = recEvent.Begin<rec::Track>();
+         trackIter != recEvent.End<rec::Track>(); ++trackIter)
+    {
+        //const rec::Track& track = *trackIter;
+        nTracks++;
+        // if you want to modify track, do (recEvent may not be const)
+        // rec::Track& mutableTrack = recEvent.Get(track.GetIndex());
+    }
+    if (nTracks > myNMax)
+        return false;
+    if (nTracks < myNMin)
+        return false;
+
+    myNEntries++;
+    return true;
+}
+
+NFittedVtxTracksCut::NFittedVtxTracksCut(int min, int max)
+{
+    myNMin = min;
+    myNMax = max;
+    char name2[50];
+    sprintf(name2,"_%i_%i",min,max);
+    my_Name = "N_Fitted_Vtx_Tracks";
+    my_Name = my_Name+ name2;
+    my_Short_Name = "NFittedVtxTrack";
+    my_Short_Name = my_Short_Name + name2;
+}
+
+bool NFittedVtxTracksCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (bSim) return true;
+
+    int nTracks = ev.GetRecEvent().GetMainVertex().GetNumberOfTracksInFit();
+    if (nTracks > myNMax)
+        return false;
+    if (nTracks < myNMin)
+        return false;
+    myNEntries++;
+    return true;
+}
+
+TrackVtxFittedTrackRatioCut::TrackVtxFittedTrackRatioCut(double minRatio)
+{
+    myMinRatio = minRatio;
+    char name2[50];
+    sprintf(name2,"_%f",minRatio);
+    my_Name = "Tracks/VtxFittedTracks";
+    my_Name =my_Name + name2;
+    my_Short_Name = "Tr/VtxFitTr";
+    my_Short_Name =my_Short_Name + name2;
+}
+
+bool TrackVtxFittedTrackRatioCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (bSim) return true;
+
+    double nVtxFittedTracks = ev.GetRecEvent().GetMainVertex().GetNumberOfTracksInFit();
+
+    double nTracks = 0;
+    RecEvent recEvent = ev.GetRecEvent();
+    for (std::list<rec::Track>::const_iterator trackIter = recEvent.Begin<rec::Track>();
+         trackIter != recEvent.End<rec::Track>(); ++trackIter)
+    {
+        //const rec::Track& track = *trackIter;
+        nTracks++;
+        // if you want to modify track, do (recEvent may not be const)
+        // rec::Track& mutableTrack = recEvent.Get(track.GetIndex());
+    }
+
+    double ratio = nVtxFittedTracks/nTracks;
+    if (ratio < myMinRatio)
+        return false;
+
+    myNEntries++;
+    return true;
+}
+
+TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds::TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds(
+        double minRatio, int min, int max)
+{
+    myNMin = min;
+    myNMax = max;
+    myMinRatio = minRatio;
+    char name2[50];
+    sprintf(name2,"_%i_%i_%f",min,max,minRatio);
+    my_Name = "LocalTrackVtxTrackRatioCut";
+    my_Name = my_Name+ name2;
+    my_Short_Name = "LocalRatio";
+    my_Short_Name = my_Short_Name + name2;
+}
+
+bool TrackVtxFittedTrackRatioCutWithFittedVtxTrackBounds::CheckEvent(
+        Event &ev, bool bSim)
+{
+    if (bSim) return true;
+
+    double nVtxFittedTracks = ev.GetRecEvent().GetMainVertex().GetNumberOfTracksInFit();
+
+    if ((nVtxFittedTracks > myNMax)||(nVtxFittedTracks < myNMin))
+    {
+        myNEntries++;
+        return true;
+    }
+
+    double nTracks = 0;
+    RecEvent recEvent = ev.GetRecEvent();
+    for (std::list<rec::Track>::const_iterator trackIter = recEvent.Begin<rec::Track>();
+         trackIter != recEvent.End<rec::Track>(); ++trackIter)
+    {
+        //const rec::Track& track = *trackIter;
+        nTracks++;
+        // if you want to modify track, do (recEvent may not be const)
+        // rec::Track& mutableTrack = recEvent.Get(track.GetIndex());
+    }
+
+    double ratio = nVtxFittedTracks/nTracks;
+    if (ratio < myMinRatio)
+        return false;
+
+    myNEntries++;
+    return true;
+}
+
+StrongBPDCut::StrongBPDCut()
+{
+    my_Name = "Strong_BPD_Cut";
+    my_Short_Name = "StrongBPD";
+}
+
+bool StrongBPDCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (bSim) return true;
+
+    const int beamStatus =  ev.GetRecEvent().GetBeam().GetStatus();
+    if (beamStatus != 0)
+        return false;
+    myNEntries++;
+    return true;
+}
 
