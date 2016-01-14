@@ -130,6 +130,7 @@ public:
 	void AddS1_1Cut();
 	void AddWFACut();
 	void AddWFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut);
+    void AddWFAT4Cut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut);
 	void AddChargeCut();
 	void AddBPDCut();
 	void AddStrongPBDCut();
@@ -158,7 +159,7 @@ public:
     void AddNFittedVtxTrackCut(int min, int max);
     void AddTrackVtxFittedTrackRatioCut(double minRation);
     void AddLocalRatioCut(double minRatio, int minBoundOfUsing, int maxBoundOfUsing);
-
+	void AddZeroPositiveTracksCut();
 
 	void AddVtxTrackStatusCut();
 	void AddImpactPointCut();

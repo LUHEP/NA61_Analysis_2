@@ -57,7 +57,7 @@ using namespace fwk;
 // type of data 
 //const bool realData = true;
 
-const int beamMomentum = 150;
+const int beamMomentum = 13;
 const double dBeamMomentum = beamMomentum; //we stil need the double and the int varialbes
 const double pMass = 0.938; 
 const double beamRapidity = 0.5*log((sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMomentum) + dBeamMomentum) /
@@ -176,6 +176,8 @@ const double minRunNumberArSc30 = 20810;
 const double maxRunNumberArSc30 = 21050;
 const double minRunNumberArSc40 = 21050;
 const double maxRunNumberArSc40 = 21270;
+const double minRunNumberArSc75 = 21375;
+const double maxRunNumberArSc75 = 21565;
 
 //for strange PSD_N clouds 
 enum ePSDNClouds {good, garbageHighPSD, garbageLowPSDLowN,garbageLowPSDHighN};

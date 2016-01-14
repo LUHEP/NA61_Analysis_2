@@ -75,7 +75,9 @@ public:
 	void nEntriesPlusPlus() {myNEntries++;}
 	void nEntriesMinusMinus() { myNEntries--; }
 	virtual bool DoYouNeedMultiplicity() { return false; }
+    virtual bool DoYouWantToKnowExistenceOfPositiveTracks() { return false;}
 	virtual void SetMultiplicity(unsigned int mult) {}
+    virtual void SetExistenceOfPositiveTracks(bool Exist) {}
 
 protected:
     int myNEntries;
@@ -125,12 +127,12 @@ public:
 private:
 };
 
-class WFACut:public EventCut
+class WFAS11Cut:public EventCut
 {
 public:
-    WFACut();
-    WFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut);
-    ~WFACut(){}
+    WFAS11Cut();
+    WFAS11Cut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut);
+    ~WFAS11Cut(){}
     bool CheckEvent(Event& event, bool bSim);
 	TString GetShortNameWithPar();
 private:
@@ -138,6 +140,23 @@ private:
     const double myWfaTime2;
     const double myWfaTimeCut;
 };
+
+class WFAT4Cut:public EventCut
+{
+public:
+    WFAT4Cut(double time1, double time2, double timeCut);
+    ~WFAT4Cut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+private:
+    WFAT4Cut();
+    const double myWfaTime1;
+    const double myWfaTime2;
+    const double myWfaTimeCut;
+
+};
+
+
 
 class ChargeCut:public EventCut
 {
@@ -700,6 +719,19 @@ public:
     bool CheckEvent(Event& ev, bool bSim);
     TString GetShortNameWithPar() { return my_Short_Name;}
 private:
+};
+
+class ZeroPositiveCut:public EventCut
+{
+public:
+    ZeroPositiveCut();
+    ~ZeroPositiveCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+    bool DoYouWantToKnowExistenceOfPositiveTracks(){return true;}
+    void SetExistenceOfPositiveTracks(bool Exist) {myExistenceOfPositive = Exist;}
+private:
+    bool myExistenceOfPositive;
 };
 
 

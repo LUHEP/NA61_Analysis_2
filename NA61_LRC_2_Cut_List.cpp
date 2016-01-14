@@ -215,6 +215,28 @@ bool CutList::EventTest(Event& ev, bool bSim)
 				pCut->SetMultiplicity(multiplicity);
 //				cout << "set_mult" << endl;
 			}
+			if (pCut->DoYouWantToKnowExistenceOfPositiveTracks()){
+//				cout << "YOUNEEDIT" << endl;
+				bool positiveTrack = false;
+				RecEvent& recEvent = ev.GetRecEvent();
+				Vertex& mainVertex = recEvent.GetMainVertex();
+				for (VertexTrackIndexIterator vtxTrackIter = mainVertex.DaughterTracksBegin();
+					 vtxTrackIter != mainVertex.DaughterTracksEnd(); ++vtxTrackIter){
+					CutList::trackCutChecking.Reset();
+					VertexTrack& vtxTrack = recEvent.Get(*vtxTrackIter);
+
+					if (myFriendCutList->TrackTest(vtxTrack, ev) == false) continue;
+
+					if (vtxTrack.GetCharge() == 1){
+						positiveTrack = true;
+						break;
+					}
+
+				}
+				pCut->SetExistenceOfPositiveTracks(positiveTrack);
+//				cout << "set_mult" << endl;
+			}
+
 			res = pCut->CheckEvent(ev, bSim);
 			if (res == true) 
 				eventCutChecking.CheckedCut(pCut->GetShortNameWithPar(),type, pass);

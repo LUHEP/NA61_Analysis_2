@@ -281,9 +281,9 @@ void OneWindHandler::Init()
 	SlopeBeamYZHist = new TH2D("BeamSlopeYZ_Mult_cloud_" + name, "BeamSlopeYZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
 	BeamPositionHistPSDLevelHist = new TH2D("Beam_PSD_level" + name, "Beam_PSD_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
 
-	VtxTracksVsAllTracksHist = new TH2D("VtxTrVsAllTrack"+name,"VtxTrVsAllTrack" + name + "vtxTracks; GoodTracks; BadTracks",301,	-0.5,	300.5, 601,	-0.5,	600.5);
+	VtxTracksVsAllTracksHist = new TH2D("VtxTrVsAllTrack"+name,"VtxTrVsAllTrack" + name + "vtxTracks; GoodVtxTracks; AllTracks",301,	-0.5,	300.5, 601,	-0.5,	600.5);
 
-    BadGoodRationHist = new TH1D("BadGoodRation"+name,"BadGoodRation" + name + "vtxTracks;  BadTracks/GoodTracks",100,	0,	10);
+    BadGoodRationHist = new TH1D("BadGoodRation"+name,"BadGoodRation" + name + "vtxTracks;  VtxTracks/AllTracks",100,	0,	1);
 
     BPD3XSignalNVtxTracks = new TH2D("BPD3XSignalNVtxTracks_"+name, "BPD3XSignalNVtxTracks" + name+"; BPD3XSignal; NTracksUsedForFitMainVtx",
                                      300, 0, 15000, 300, -0.5, 300);
@@ -542,13 +542,14 @@ void OneWindHandler::EndOfEvent(Event& ev)
     {
         const rec::Track& track = *trackIter;
         nTracks++;
-        // if you want to modify track, do (recEvent may not be const)
-       // rec::Track& mutableTrack = recEvent.Get(track.GetIndex());
     }
-    N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
+    //N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
+
+
+
     VtxTracksVsAllTracksHist -> Fill(N,nTracks/*-N*/);
-    if (N<50)
-        BadGoodRationHist->Fill((nTracks/*-N*/)/N);
+    if (N<(beamMomentum/3))
+        BadGoodRationHist->Fill(N/nTracks);
 
     BPD3XSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalX,N);
     BPD3YSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalY,N);
@@ -967,13 +968,19 @@ void BaseHandler::AddS1_1Cut()
 
 void BaseHandler::AddWFACut()
 {
-    Cut* WFA = new WFACut();
+    Cut* WFA = new WFAS11Cut();
     myEventCutList->AddCut(WFA);
 }
 
 void BaseHandler::AddWFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut)
 {
-    Cut* WFA = new WFACut(wfa_Time1, wfa_Time2, wfa_TimeCut);
+    Cut* WFA = new WFAS11Cut(wfa_Time1, wfa_Time2, wfa_TimeCut);
+    myEventCutList->AddCut(WFA);
+}
+
+void BaseHandler::AddWFAT4Cut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut){
+
+    Cut* WFA = new WFAT4Cut(wfa_Time1, wfa_Time2, wfa_TimeCut);
     myEventCutList->AddCut(WFA);
 }
 
@@ -1367,6 +1374,12 @@ void BaseHandler::AddBPD3ClusterSignalCut(double minX, double maxX, double minY,
 void BaseHandler::AddStrongPBDCut()
 {
 	Cut* A = new StrongBPDCut();
+	myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddZeroPositiveTracksCut()
+{
+	Cut* A  = new ZeroPositiveCut();
 	myEventCutList->AddCut(A);
 }
 
@@ -2067,9 +2080,16 @@ void TimeHandler::Init() {
 				break;
 			}
 
+			if (beamMomentum == 75){
+				minBound = minRunNumberArSc75 - 0.5;
+				maxBound = maxRunNumberArSc75 + 0.5;
+				nBinsRunNumber = maxBound - minBound;
+				break;
+			}
+
 		default:
 			minBound = -0.5;
-			maxBound = 21000.5;
+			maxBound = 50000.5;
 			nBinsRunNumber = maxBound - minBound;
 			break;
 	}
@@ -2257,6 +2277,7 @@ void PSDHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
         nTracks0++;
 }
 
+
 void PSDHandler::EndOfEvent(Event & ev) {
     if (init == false) { this->Init(); }
     double arVal[nBinsPSDModules] = {0};
@@ -2271,4 +2292,3 @@ void PSDHandler::EndOfEvent(Event & ev) {
     nTracks0 = 0;
     nTracks1 = 0;
 }
-

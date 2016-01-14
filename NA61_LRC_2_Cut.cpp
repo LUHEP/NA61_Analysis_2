@@ -72,7 +72,7 @@ bool S1_1Cut::CheckEvent(Event& event, bool bSim)
 	return 1;
 }
 
-WFACut::WFACut():
+WFAS11Cut::WFAS11Cut():
 	myWfaTime1(wfaTime1),
 	myWfaTime2(wfaTime2),
 	myWfaTimeCut(wfaTimeCut)
@@ -81,7 +81,7 @@ WFACut::WFACut():
 	my_Short_Name = "WFA"; 
 }
 
-WFACut::WFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut):
+WFAS11Cut::WFAS11Cut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut):
 	myWfaTime1(wfa_Time1),
 	myWfaTime2(wfa_Time2),
 	myWfaTimeCut(wfa_TimeCut)
@@ -90,7 +90,7 @@ WFACut::WFACut(double wfa_Time1, double wfa_Time2, double wfa_TimeCut):
 	my_Short_Name = "WFA"; 
 }
 
-TString WFACut::GetShortNameWithPar()
+TString WFAS11Cut::GetShortNameWithPar()
 {
 	TString name;
 	char name2[50];
@@ -99,7 +99,7 @@ TString WFACut::GetShortNameWithPar()
 	return name;
 }
 
-bool WFACut::CheckEvent(Event& event, bool bSim)
+bool WFAS11Cut::CheckEvent(Event& event, bool bSim)
 {
 //	cout<<"WFA"<<endl;
 	const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger();
@@ -2307,4 +2307,128 @@ bool StrongBPDCut::CheckEvent(Event &ev, bool bSim)
     myNEntries++;
     return true;
 }
+
+
+WFAT4Cut::WFAT4Cut(double time1, double time2, double timeCut):
+        myWfaTime1(time1),
+        myWfaTime2(time2),
+        myWfaTimeCut(timeCut)
+{
+    my_Name = "WFAT4";
+    my_Short_Name = "WFAT4";
+    TString name;
+    char name2[50];
+    sprintf(name2,"_%f_%f_%f",myWfaTime1,myWfaTime2,myWfaTimeCut);
+    my_Name = my_Name+name2;
+    my_Short_Name = my_Short_Name+name2;
+}
+
+TString WFAT4Cut::GetShortNameWithPar()
+{
+    return my_Short_Name;
+}
+
+bool WFAT4Cut::CheckEvent(Event& event, bool bSim)
+{
+//	cout<<"WFA"<<endl;
+    const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger();
+
+    vector<double> timeStructureWFA;
+
+    if (!trigger.HasTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eT4))
+        return 0;
+    timeStructureWFA = trigger.GetTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eT4);
+//    for (unsigned int i = 0; i < timeStructureWFA.size(); ++i){
+ //       cout<<timeStructureWFA.at(i)<<endl;
+  //  }
+    bool beamExist = false;
+    for (unsigned int i = 0; i < timeStructureWFA.size(); ++i)
+    {
+        if ((!beamExist) && (timeStructureWFA.at(i) >= myWfaTime1 && timeStructureWFA.at(i) <= myWfaTime2))
+            beamExist = true;
+        else if ((timeStructureWFA.at(i) <= myWfaTime1 || timeStructureWFA.at(i) >= myWfaTime2)
+                    && (fabs(timeStructureWFA.at(i)) < 1000. * myWfaTimeCut)){
+            beamExist = false;
+            break;
+        }
+    }
+    if (beamExist == false)	return 0;
+    myNEntries++;
+    return 1;
+}
+
+/*bool WFAIntCut::CheckEvent(Event& event, bool bSim)
+{
+// cout«"WFA"«endl;
+    const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger();
+
+    vector<double> timeStructureWFA;
+
+    if (trigger.HasTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eT4) &&
+            trigger.HasTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eS1_1)){
+        timeStructureWFA = trigger.GetTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eT4);
+
+        bool beamExist = false;
+        for (unsigned int i = 0; i < timeStructureWFA.size(); ++i)
+            if (fabs(timeStructureWFA.at(i))<1000. * myWfaTimeCut &&
+                    fabs(timeStructureWFA.at(i))>1000. * myWFATimeDummyCut) {
+                return 0;
+            };
+
+        myNEntries++;
+        return 1;
+    }else{
+        myNEntries++;
+        return 1;
+    }
+
+}*/
+
+
+ZeroPositiveCut::ZeroPositiveCut()
+{
+    my_Short_Name = "ZeroPlus";
+    my_Name = "ZeroPlusCut";
+}
+
+bool ZeroPositiveCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (myExistenceOfPositive) myNEntries++;
+    return myExistenceOfPositive;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
