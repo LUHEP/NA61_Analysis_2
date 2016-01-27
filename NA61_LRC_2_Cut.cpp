@@ -1785,35 +1785,68 @@ TString PSDEnergyCut::GetShortNameWithPar()
 
 S5Cut::S5Cut(double upLimit, bool bRaw)
 {
-	my_Name = "S5";
-	my_Short_Name = "S5";
-	myBRaw = bRaw;
-	if (bRaw)
-		myUpLimit = upLimit;
-	else
-		cout << "WARNING: S5 is only for RAW data!" << endl;
+    my_Name = "S5";
+    my_Short_Name = "S5";
+    myBRaw = bRaw;
+    if (bRaw)
+        myUpLimit = upLimit;
+    else
+        cout << "WARNING: S5 is only for RAW data!" << endl;
 }
 
 bool S5Cut::CheckEvent(Event& event, bool bSim)
 {
-	if (myBRaw == false)
-		return true;//notrhing to do
-	double A = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
-	if (A < myUpLimit){
-		myNEntries++;
-		return true;
-	}
-	else 
-		return false;
+    if (myBRaw == false)
+        return true;//notrhing to do
+    double A = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
+    if (A < myUpLimit){
+        myNEntries++;
+        return true;
+    }
+    else
+        return false;
 }
 
 TString S5Cut::GetShortNameWithPar()
 {
-	TString name;
-	char name2[50];
-	sprintf(name2, "_%f", myUpLimit);
-	name = my_Short_Name + name2;
-	return name;
+    TString name;
+    char name2[50];
+    sprintf(name2, "_%f", myUpLimit);
+    name = my_Short_Name + name2;
+    return name;
+}
+
+S2Cut::S2Cut(double upLimit, bool bRaw)
+{
+    my_Name = "S2";
+    my_Short_Name = "S2";
+    myBRaw = bRaw;
+    if (bRaw)
+        myUpLimit = upLimit;
+    else
+        cout << "WARNING: S2 is only for RAW data!" << endl;
+}
+
+bool S2Cut::CheckEvent(Event& event, bool bSim)
+{
+    if (myBRaw == false)
+        return true;//notrhing to do
+    double A = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS2);
+    if (A < myUpLimit){
+        myNEntries++;
+        return true;
+    }
+    else
+        return false;
+}
+
+TString S2Cut::GetShortNameWithPar()
+{
+    TString name;
+    char name2[50];
+    sprintf(name2, "_%f", myUpLimit);
+    name = my_Short_Name + name2;
+    return name;
 }
 
 RunNumberCut::RunNumberCut(int lowLimit, int upLimit, bool bRaw)
@@ -1919,6 +1952,9 @@ RunWith0EnergyInOneModuleCutVer2::RunWith0EnergyInOneModuleCutVer2(bool bRaw, eP
 {
     myBRaw = bRaw;
 	TString name;
+    for (int i = 0; i<45; i++)
+        myPSDModArray[i] = 0;
+
 	switch (ePSDSet)
 	{
 		case e28Central:
@@ -2037,13 +2073,19 @@ BadRunCut::BadRunCut(bool bRaw)
     my_Name = "BadRuns";
     my_Short_Name = "BudRuns";
     if (systemType != ArSc) myBRaw = false;
-    if (beamMomentum != 150) myBRaw = false;
-    if (myBRaw){
-        myNBadRuns = nBadRunsArSc150;
-        myArBadRuns = arBadRunsArSc150;
-
-
-    }
+	switch (beamMomentum){
+		case 150:
+			myNBadRuns = nBadRunsArSc150;
+			myArBadRuns = arBadRunsArSc150;
+			break;
+		case 13:
+			myNBadRuns = nBadRunsArSc13;
+			myArBadRuns = arBadRunsArSc13;
+			break;
+		default:
+			myBRaw = false;
+			break;
+	}
 }
 
 TString BadRunCut::GetShortNameWithPar()
@@ -2397,13 +2439,115 @@ bool ZeroPositiveCut::CheckEvent(Event &ev, bool bSim)
     return myExistenceOfPositive;
 }
 
+BeamPositionInS::BeamPositionInS(eMyS sType, eMyCoordinate coord, double lowBound, double upBound, bool bRaw)
+{
+	my_Name = "BeamPositionIn";
+	my_Short_Name = "BeamPos";
+	myRaw = bRaw;
+	if (bRaw) {
+		myUpLimit = upBound;
+		myLowLimit = lowBound;
+		mySType = sType;
+		myCoordinate = coord;
+		switch (sType){
+			case S1:
+				my_Name+="S1";
+				my_Short_Name+="S1";
+				break;
+			case S2:
+				my_Name+="S2";
+				my_Short_Name+="S2";
+				break;
+			case S5:
+				my_Name+="S5";
+				my_Short_Name+="S5";
+				break;
+			default:
+				break;
+		}
+		switch (coord){
+			case X:
+				my_Name+="X";
+				my_Short_Name+="X";
+				break;
+			case Y:
+				my_Name+="Y";
+				my_Short_Name+="Y";
+				break;
+			case Z:
+				cout << "WARNING: BeamPosition is only for X and Y!" << endl;
+				myRaw = false;
+				break;
+			default:
+				cout << "WARNING: BeamPosition, something is wrong!" << endl;
+				break;
 
+		}
+	}
+	else
+		cout << "WARNING: BeamPosition is only for RAW data!" << endl;
 
+	TString name;
+	char name2[50];
+	sprintf(name2, "_%f_%f", myLowLimit, myUpLimit);
+	name = name2;
+	my_Name = my_Name + name;
+	my_Short_Name = my_Name+name;
+}
 
+bool BeamPositionInS::CheckEvent(Event& ev, bool bSim)
+{
+	if (myRaw == false)
+		return true;//notrhing to do
+	double coord;
+    RecEvent* pRecEvent=&ev.GetRecEvent();
+	switch (mySType){
+		case S1:
+			if (myCoordinate == X)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S1Z);
+			if (myCoordinate == Y)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S1Z);
+			break;
+		case S2:
+			if (myCoordinate == X)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S2Z);
+			if (myCoordinate == Y)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S2Z);
+			break;
+		case S5:
+			if (myCoordinate == X)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S5Z);
+			if (myCoordinate == Y)
+				coord = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S5Z);
+			break;
+		default:
+			break;
+	}
+	if (coord < myUpLimit && coord > myLowLimit){
+		myNEntries++;
+		return true;
+	}
+	else
+		return false;
+}
 
+BPD3RMS::BPD3RMS()
+{
+	my_Short_Name="BPD3RMS";
+	my_Name="BPD3RMS";
+}
 
+bool BPD3RMS::CheckEvent(Event &ev, bool bSim)
+{
+	if (bSim) return false;
+	RecEvent* pRecEvent=&ev.GetRecEvent();
+	double X = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetRMS();
+	double Y = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetRMS();
+	if (X>0.23 || Y>0.23) return 0;
 
-
+	myNEntries++;
+	return true;
+}
 
 
 

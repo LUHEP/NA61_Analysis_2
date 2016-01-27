@@ -74,15 +74,31 @@ public:
     double_t myBeamSlopeZY;
     double_t myBeamPositionAtPSDX;
     double_t myBeamPositionAtPSDY;
+
+    double_t myBeamPositionAtS1X;
+    double_t myBeamPositionAtS1Y;
+    double_t myBeamPositionAtS2X;
+    double_t myBeamPositionAtS2Y;
+    double_t myBeamPositionAtS5X;
+    double_t myBeamPositionAtS5Y;
+
 	double_t myEnergyPSD;
-    vector<double> myTimeStructureWFA; //Ya pomenyal
+
+    vector<double> myTimeStructureWFA;
+    vector<double> myTimeStructureWFAT4;
+    vector<double> myTimeStructureMHTDC;
 	unsigned int myRunNumber; 
 	double_t myS5ADC;
+    double_t myS1ADC;
+    double_t myS2ADC;
 
     double_t myBPD3SignalX;
     double_t myBPD3SignalY;
     double_t myBPD3SumAllX;
     double_t myBPD3SumAllY;
+    double_t myBPD3XRMS;
+    double_t myBPD3YRMS;
+
     double_t myEnergyPSD44;
     double_t myEnergyPSD16;
     double_t myEnergyPSD28per;
@@ -149,6 +165,7 @@ public:
 	void AddPSDCloudsCut();
 	void AddPSDCloudsCut(ePSDNClouds eCloudType);
 	void AddS5Cut(double upLimit);
+    void AddS2Cut(double upLimit);
 	void AddRunNumberCut(int lowLimit, int upLimit);
 	void Remove0EPSDEvents(ePSDModulCombinations ePSDMod);
 	void RemoveBadRuns();
@@ -160,8 +177,10 @@ public:
     void AddTrackVtxFittedTrackRatioCut(double minRation);
     void AddLocalRatioCut(double minRatio, int minBoundOfUsing, int maxBoundOfUsing);
 	void AddZeroPositiveTracksCut();
+    void AddBeamPositionInSCut(eMyS sType, eMyCoordinate coord, double lowBound, double upBound);
+    void AddBPD3RMS();
 
-	void AddVtxTrackStatusCut();
+    void AddVtxTrackStatusCut();
 	void AddImpactPointCut();
 	void AddImpactPointCut(double_t max_dX, double_t max_dY);
 	void AddVTPCAndGTPCCut();
@@ -189,6 +208,7 @@ public:
 	void AddStandardCutsSim();
 
 	CutList* GetTrackCutList(){ return myTrackCutList; }
+	bool		init; //???
 
 protected:
 	BaseHandler();
@@ -197,7 +217,6 @@ protected:
 	TString nameOutFile;
 	TString myNameHist;
 
-	bool		init; //???
 	bool		bSim;
 	bool		bRaw;
 
@@ -232,7 +251,7 @@ public:
 private:
 	OneWindHandler();
 	// --- list of hists
-	TH1D*	psdEnergyHist;
+	TH1D 	*psdEnergyHist, *psdEnergyHist16;
 	TH1D	*chargeHist,	*multHist,
 //   all charges	  neg		 pos
 		*pHist,		*pHist0,	*pHist1,
@@ -250,11 +269,14 @@ private:
     TH2D  *BPD1Hist, *BPD2Hist, *BPD3Hist, *ImpParHist;
     
     TH1D  *WFAHist, *fitVtxHist;
+	TH1D  *WFAT4Hist;
+    TH1D  *MHTDCHist;
 	TH2D  *dEdxPHist0, *dEdxPHist1, *fitVtxNHist; //Ya pomenyal
     
     TH2D	*psdEnergyNHist;
 	TH2D	*psdEnergyS5Hist;
 	TH2D	*multS5Hist;
+    TH2D    *S1S2Hist;
     TH1D	*totClusterHist, *verClusterHist, *gapClusterHist; //Ya pomenyal
     TH1D    *nBeamHist; //Ya pomenyal
 
@@ -277,6 +299,20 @@ private:
     TH2D    *BPD3SignalRatioYTrackRatio;
     TH2D    *BPD3SignalDifXTrackRatio;
     TH2D    *BPD3SignalDifYTrackRatio;
+
+    TH2D    *BeamPositionS1LevelHist;
+    TH2D    *BeamPositionS2LevelHist;
+    TH2D    *BeamPositionS5LevelHist;
+	TH2D    *BeamPositionS1XSignalLevelHist;
+	TH2D    *BeamPositionS1YSignalLevelHist;
+	TH2D    *BeamPositionS2XSignalLevelHist;
+	TH2D    *BeamPositionS2YSignalLevelHist;
+	TH2D    *BeamPositionS5XSignalLevelHist;
+	TH2D    *BeamPositionS5YSignalLevelHist;
+	TH3D	*BeamPositionS1vsSignalHist;
+	TH3D	*BeamPositionS2vsSignalHist;
+	TH3D	*BeamPositionS5vsSignalHist;
+    TH2D    *BPD3RMSHist;
 
  //   TH3D    *acceptHist;
     

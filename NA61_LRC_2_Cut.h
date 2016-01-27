@@ -549,6 +549,20 @@ private:
 	bool myBRaw;
 };
 
+class S2Cut :public EventCut
+{
+public:
+    S2Cut(double upLimit, bool bRaw);
+    ~S2Cut(){}
+    bool CheckEvent(Event& event, bool bSim);
+    TString GetShortNameWithPar();
+
+private:
+    S2Cut();
+    double myUpLimit;
+    bool myBRaw;
+};
+
 //Run number cut, for example if you want to analyse a special set of runs
 class RunNumberCut : public EventCut
 {
@@ -732,6 +746,33 @@ public:
     void SetExistenceOfPositiveTracks(bool Exist) {myExistenceOfPositive = Exist;}
 private:
     bool myExistenceOfPositive;
+};
+
+class BeamPositionInS:public EventCut
+{
+public:
+    BeamPositionInS(eMyS sType, eMyCoordinate coord, double lowBound, double upBound, bool bRaw);
+    ~BeamPositionInS() {}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    BeamPositionInS();
+    eMyCoordinate myCoordinate;
+    eMyS mySType;
+    double myLowLimit;
+    double myUpLimit;
+    bool myRaw;
+};
+
+class BPD3RMS:public EventCut
+{
+public:
+    BPD3RMS();
+    ~BPD3RMS(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    bool myRaw;
 };
 
 

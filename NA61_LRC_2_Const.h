@@ -56,7 +56,6 @@ using namespace fwk;
 
 // type of data 
 //const bool realData = true;
-
 const int beamMomentum = 13;
 const double dBeamMomentum = beamMomentum; //we stil need the double and the int varialbes
 const double pMass = 0.938; 
@@ -68,6 +67,8 @@ const eSystemType systemType = ArSc;
 enum eMyBPD{BPD1, BPD2, BPD3};
 enum eBeamSlopePlane{ZX,ZY};
 enum eTrigger{T1, T2};
+enum eMyS{S1,S2,S5};
+enum eMyCoordinate{X,Y,Z};
 
 // Change it to your path
 const TString configPath = "/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetIN";
@@ -146,7 +147,7 @@ const double arXmaxPSDFluc[nBinsPSDFluc] = { 300.5, 1.5, 6500, 29.5 };
 // --- const for PSDHanler
 // iModule PSD energy
 const int nBinsPSDModules = nPSDModules + 1;
-const int arNBinsPSDModules[nBinsPSDModules] = {251,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
+const int arNBinsPSDModules[nBinsPSDModules] = {751,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
 
@@ -154,10 +155,10 @@ const double arXminPSDModules[nBinsPSDModules] = {-0.5,-10,-10,-10,-10,-10,-10,-
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10};
-const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {250.5,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
-                                                  1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
-                                                  1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,1200,
-                                                  1200,1200,1200};
+const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {750.5,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
+														 2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
+														 2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
+														 2000,2000,2000};
 const double arXmaxPSDModulesBeBe150[nBinsPSDModules] = {40.5,600,600,600,600,600,600,600,600,600,600,600,600,600,
 												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
 												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
@@ -227,3 +228,37 @@ const int arRunsWith0EnergyInOnePSDModule[nRunsWith0EnergyInOnePSDModule] [2]= {
 const int nBadRunsArSc150 = 13;
 const int arBadRunsArSc150[nBadRunsArSc150] = {20391, 20398,20415, 20416, 20417,// problem with beam (signal in BPD)
                                                20428, 20429, 20431, 20432, 20433, 20437, 20438, 20439}; // module 6 PSD
+
+const int nBadRunsArSc13 =0;
+const int arBadRunsArSc13[nBadRunsArSc13] = {};//{20545, 20550};
+
+//S coordinates
+const double S1Z = -3657;
+const double S2Z = -1442;
+const double S5Z = 1000;
+
+
+
+// Hists & Handlers
+// -- One Wind Handler
+// --- tracks
+const bool bOneWindHandlerMomentum1d = false;
+const bool bBeamPositionSvsSignal = false;
+// --- events
+
+// Triggers
+const bool bT1=true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+

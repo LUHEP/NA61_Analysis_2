@@ -8,6 +8,8 @@
 #include "NA61_LRC_2_Const.h"
 #endif
 
+#include <TProfile2D.h>
+
 BaseHandler::BaseHandler(const char* nameOut)
 {
 	nameOutFile=nameOut;
@@ -92,6 +94,8 @@ OneWindHandler::~OneWindHandler()
 	chargeHist->Write();
 	multHist->Write();
 	psdEnergyHist->Write();
+    psdEnergyHist16->Write();
+
     //acceptHist->Write();
     
   //  plusminusHist->Write();
@@ -104,12 +108,24 @@ OneWindHandler::~OneWindHandler()
     ptPhiHist->Write();
 	ptPhiHist0->Write();
 	ptPhiHist1->Write();
-    
-	pHist->Write();			pHist0->Write();			pHist1->Write();
-	pxHist->Write();		pxHist0->Write();			pxHist1->Write();
-	pyHist->Write();		pyHist0->Write();			pyHist1->Write();
-	pzHist->Write();		pzHist0->Write();			pzHist1->Write();
-	ptHist->Write();		ptHist0->Write();			ptHist1->Write();
+
+    if (bOneWindHandlerMomentum1d) {
+        pHist->Write();
+        pHist0->Write();
+        pHist1->Write();
+        pxHist->Write();
+        pxHist0->Write();
+        pxHist1->Write();
+        pyHist->Write();
+        pyHist0->Write();
+        pyHist1->Write();
+        pzHist->Write();
+        pzHist0->Write();
+        pzHist1->Write();
+        ptHist->Write();
+        ptHist0->Write();
+        ptHist1->Write();
+    }
 	etaHist->Write();		etaHist0->Write();			etaHist1->Write();
 	rapHist->Write();		rapHist0->Write();			rapHist1->Write();
 	phiHist->Write();		phiHist0->Write();			phiHist1->Write();
@@ -119,20 +135,22 @@ OneWindHandler::~OneWindHandler()
 	BPD3Hist->Write();
 	ImpParHist->Write();
 	WFAHist->Write();
+    WFAT4Hist->Write();
 	fitVtxHist->Write();
-    
+
     dEdxPHist0->Write();
 	dEdxPHist1->Write(); //Ya pomenyal
     fitVtxNHist->Write(); //Ya pomenyal
-    
-    psdEnergyNHist->Write(); 
+
+    psdEnergyNHist->Write();
 	psdEnergyS5Hist->Write();
 	multS5Hist->Write();
-    
+    S1S2Hist->Write();
+
     totClusterHist->Write(); //Ya pomenyal
     verClusterHist->Write(); //Ya pomenyal
     gapClusterHist->Write(); //Ya pomenyal
-    
+
     nBeamHist->Write(); //Ya pomenyal
 
     BPD1XMultHist->Write();  BPD1YMultHist->Write();
@@ -141,7 +159,33 @@ OneWindHandler::~OneWindHandler()
 	SlopeBeamXZHist->Write();
 	SlopeBeamYZHist->Write();
 	BeamPositionHistPSDLevelHist->Write();
-	VtxTracksVsAllTracksHist->Write();
+/*
+    BeamPositionS1LevelHist->Write();
+    BeamPositionS2LevelHist->Write();
+    BeamPositionS5LevelHist->Write();
+    BeamPositionS1XSignalLevelHist->Write();
+    BeamPositionS1YSignalLevelHist->Write();
+    BeamPositionS2XSignalLevelHist->Write();
+    BeamPositionS2YSignalLevelHist->Write();
+    BeamPositionS5XSignalLevelHist->Write();
+    BeamPositionS5YSignalLevelHist->Write();
+*/
+//    BeamPositionS1vsSignalHist->Write();
+//    BeamPositionS2vsSignalHist->Write();
+ //   BeamPositionS5vsSignalHist->Write();
+
+ //   TH2D* BeamPositionS1vsSignalHist2D = new TH2D("Beam_S1signal_level" + name, "Beam_S1signal_level" + name + "; X; Y; S1_Signal_mean", 400,	-5,	5, 400, -5, 5);
+ //   TH2D* BeamPositionS2vsSignalHist2D = new TH2D("Beam_S2signal_level" + name, "Beam_S2signal_level" + name + "; X; Y; S1_Signal_mean", 400,	-5,	5, 400, -5, 5);
+ //   TH2D* BeamPositionS5vsSignalHist2D = new TH2D("Beam_S5signal_level" + name, "Beam_S5signal_level" + name + "; X; Y; S1_Signal_mean", 400,	-5,	5, 400, -5, 5);
+    if (bBeamPositionSvsSignal) {
+        TProfile2D *Pr1 = BeamPositionS1vsSignalHist->Project3DProfile("xy");
+        Pr1->Write();
+        TProfile2D *Pr2 = BeamPositionS2vsSignalHist->Project3DProfile("xy1");
+        Pr2->Write();
+        TProfile2D *Pr5 = BeamPositionS5vsSignalHist->Project3DProfile("xy2");
+        Pr5->Write();
+    }
+    VtxTracksVsAllTracksHist->Write();
     BadGoodRationHist->Write();
 
     BPD3XSignalNVtxTracks ->Write();
@@ -154,12 +198,12 @@ OneWindHandler::~OneWindHandler()
     BPD3SignalRatioYTrackRatio->Write();
     BPD3SignalDifXTrackRatio->Write();
     BPD3SignalDifYTrackRatio->Write();
-
+    BPD3RMSHist->Write();
 
     cout<<nameOutFile<<endl;
 	cout<<"nEvent:  "<<multHist->GetEntries()<<endl;
 	cout<<"nTracks: "<<etaptHist->GetEntries()<<endl<<endl;
-	
+
 	outputFile.Close();
 }
 
@@ -186,27 +230,28 @@ void OneWindHandler::Init()
 		n = 7;
 		break;
 	case ArSc:
-		n = 40; 
+		n = 40;
 		break;
 	case PbPb:
-		n = 208; 
+		n = 208;
 		break;
 	default:
 		break;
 	}
 	double maxPSDEnergy = beamMomentum * n * 2;
 	psdEnergyHist = new TH1D("PSDHist_" + name, "PSD energy distribution" + name + ";PSD(28);entries", 1000, 0, maxPSDEnergy);
-	//acceptHist		= new TH3D("acceptance_"+name, "acceptance_"+name+ "; phi;Pt;eta;entries",31,-3.5,3.5,31,0,1.5, 61,0,10);
-	
+    psdEnergyHist16 = new TH1D("PSDHist16_" + name, "PSD energy distribution" + name + ";PSD(16);entries", 1000, 0, maxPSDEnergy);
+    //acceptHist		= new TH3D("acceptance_"+name, "acceptance_"+name+ "; phi;Pt;eta;entries",31,-3.5,3.5,31,0,1.5, 61,0,10);
+
 	chargeHist	= new TH1D("chargeHist_"+name,"chargeHist_"+name+";charge;entries",	5,		-2.5,	2.5);
 	multHist	= new TH1D("multHist_"+name,"multHist_"+name+	";nTracks;entries",		301,	-0.5,	300.5);
-    
-    
+
+
  //   plusminusHist	= new TH2D("plusminus_correlation_cloud_"+name,	"plusminus_correlation_cloud_"+name+"; N-; N+; entries",	31,-0.5,300.5,	31,-0.5,300.5);
     etaptHist		= new TH2D("etapt_cloud_"+ name,"etapt_cloud_"+ name+	"; eta;Pt;entries",			600,0,10, 300,0,1.5);
     etaptHist0		= new TH2D("etapt_cloud0_"+name,"etapt_cloud0_"+name+	"; eta;Pt;entries (-)",		600,0,10, 300,0,1.5);
     etaptHist1		= new TH2D("etapt_cloud1_"+name,"etapt_cloud1_"+name+	"; eta;Pt;entries (+)",		600,0,10, 300,0,1.5);
-	
+
 	rapPtHist = new TH2D("rap_pt_cloud_" + name, "rap_pt_cloud_" + name + "; rapidity;Pt;entries",			600, -4, 4, 300, 0, 1.5);
 	rapPtHist0 = new TH2D("rap_pt_cloud0_" + name, "rap_pt_cloud0_" + name + "; rapidity;Pt;entries (-)",	600, -4, 4, 300, 0, 1.5);
 	rapPtHist1 = new TH2D("rap_pt_cloud1_" + name, "rap_pt_cloud1_" + name + "; rapidity;Pt;entries (+)",	600, -4, 4, 300, 0, 1.5);
@@ -215,48 +260,63 @@ void OneWindHandler::Init()
     ptPhiHist		= new TH2D("ptPhi_cloud_"+name,"ptPhi_cloud_"+name+		"; phi;Pt;entries",			150,-3.5,3.5, 300,0,1.5); //!
     ptPhiHist0		= new TH2D("ptPhi_cloud0_"+name,"ptPhi_cloud0_"+name+	"; phi;Pt;entries (-)",		150,-3.5,3.5, 300,0,1.5);//!
     ptPhiHist1		= new TH2D("ptPhi_cloud1_"+name,"ptPhi_cloud1_"+name+	"; phi;Pt;entries (+)",		150,-3.5,3.5, 300,0,1.5);//!
-	
+
 	BPD1Hist = new TH2D("BPD1_cloud_" + name, "BPD1_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2); //!
 	BPD2Hist = new TH2D("BPD2_cloud_" + name, "BPD2_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2);
 	BPD3Hist = new TH2D("BPD3_cloud_" + name, "BPD3_cloud_" + name + "; x [cm]; y [cm]; entries", 100, -2, 2, 100, -2, 2);
 	ImpParHist 		= new TH2D("ImpPar_"+name,"ImpPar_"+name+ 				"; b_x [cm]; b_y [cm]; entries", 400, -5, 5, 400, -5, 5); //Ya pomenyal (sdelal poshire dlya QA plots)
-	
-	WFAHist 	= new TH1D("WFA_"+ name,"WFA_"+ name+ ";time [ns]; entries",			251,	-30000,	30000); //Ya pomenyal
+
+	WFAHist 	= new TH1D("WFA_"+ name,"WFA_"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
+    WFAT4Hist   = new TH1D("WFA_T4_"+ name, "WFA_T4"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
+    MHTDCHist   = new TH1D("MHTDC_"+ name, "MHTDC"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
 	fitVtxHist  = new TH1D("Fitted_Vtx_Position_"+name, "fitVtx_"+name+";z [cm]; entries", 7001,-700,0);
-	
+
 	dEdxPHist0 = new TH2D("dEdxP0_cloud_" + name, "dEdxP0_cloud_" + name + "; log10(p[GeV/c]); dE/dx (negative); entries", 601, -3, 3, 301, -0.05, 3.95); //Ya pomenyal (nado esche pomenyat', chtoby klalsya srazu log(p) v hist
 	dEdxPHist1   = new TH2D("dEdxP1_cloud_"+name,"dEdxP1_cloud_"+name+ 		"; log10(p[GeV/c]); dE/dx (positive); entries", 601, -3, 3, 301, -0.05, 3.95); //Ya pomenyal (nado esche pomenyat', chtoby klalsya srazu log(p) v hist
     fitVtxNHist   = new TH2D("fitVtxN_cloud_"+name,"fitVtxN_cloud_"+name+ 		"; z [cm]; N; entries", 7001, -700, 0, 31,	-0.5,	300.5); //Ya pomenyal
-    
+
 	psdEnergyNHist = new TH2D("psdEnergyN_cloud_" + name, "psdEnergyN_cloud_" + name + "; PSD(28) [GeV]; N; entries", 1000, 0, maxPSDEnergy, 301, -0.5, 300.5); //Ya pomenyal
 	psdEnergyS5Hist = new TH2D("psdEnergyS5_cloud_" + name, "psdEnergyS5_cloud_" + name + "; PSD(28) [GeV]; S5; entries", 1000, 0, maxPSDEnergy, 101, -0.5, 500.5);
 	multS5Hist = new TH2D("S5N_cloud_" + name, "S5N_cloud_" + name + "; S5; N; entries", 101, -0.5, 500.5, 301, -0.5, 300.5);
-    
+
+    S1S2Hist = new TH2D("S1S2_cloud_" + name, "S1S2_cloud_" + name + "; S1; S2; entries", 101, -0.5, 1000.5, 101, -0.5, 1000.5);
+
     totClusterHist	= new TH1D("totClusterHist_"+name,"totClusterHist_"+name+	";nTotalClusters;entries",		301,	-0.5,	300.5); //Ya pomenyal
     verClusterHist	= new TH1D("verClusterHist_"+name,"verClusterHist_"+name+	";nVTPCClusters;entries",		301,	-0.5,	300.5); //Ya pomenyal
     gapClusterHist	= new TH1D("gapClusterHist_"+name,"gapClusterHist_"+name+	";nGTPCClusters;entries",		31,	-0.5,	30.5); //Ya pomenyal
-    
+
     nBeamHist	= new TH1D("nBeamHist_"+name,"nBeamHist_"+name+	";nBeamParticles;entries",		31,	-0.5,	30.5); //Ya pomenyal
+    if (bOneWindHandlerMomentum1d) {
+        pHist = new TH1D("pHist_" + name, "pHist_" + name + ";p;entries", 500, -1, beamMomentum * 2.5);
+        pHist0 = new TH1D("pHist0_" + name, "pHist0_" + name + ";p;entries (-)", 500, -1, beamMomentum * 2.5);
+        pHist0->SetLineColor(kBlue);
+        pHist1 = new TH1D("pHist1_" + name, "pHist1_" + name + ";p;entries (+)", 500, -1, beamMomentum * 2.5);
+        pHist1->SetLineColor(kRed);
 
-	pHist		= new TH1D("pHist_"+   name,"pHist_"+   name+	";p;entries",			500,	-1,		beamMomentum*2.5);
-	pHist0 = new TH1D("pHist0_" + name, "pHist0_" + name + ";p;entries (-)", 500, -1, beamMomentum*2.5);	pHist0->SetLineColor(kBlue);
-	pHist1 = new TH1D("pHist1_" + name, "pHist1_" + name + ";p;entries (+)", 500, -1, beamMomentum*2.5);	pHist1->SetLineColor(kRed);
+        pxHist = new TH1D("pxHist_" + name, "pxHist_" + name + ";px;entries", 300, -2, 2);
+        pxHist0 = new TH1D("pxHist0_" + name, "pxHist0_" + name + ";px;entries (-)", 300, -2, 2);
+        pxHist0->SetLineColor(kBlue);
+        pxHist1 = new TH1D("pxHist1_" + name, "pxHist1_" + name + ";px;entries (+)", 300, -2, 2);
+        pxHist1->SetLineColor(kRed);
 
-	pxHist		= new TH1D("pxHist_"+  name,"pxHist_"+  name+";px;entries"    ,		300,	-2,		2);
-	pxHist0		= new TH1D("pxHist0_"+ name,"pxHist0_"+ name+";px;entries (-)",		300,	-2,		2);		pxHist0->SetLineColor(kBlue);
-	pxHist1		= new TH1D("pxHist1_"+ name,"pxHist1_"+ name+";px;entries (+)",		300,	-2,		2);		pxHist1->SetLineColor(kRed);
+        pyHist = new TH1D("pyHist_" + name, "pyHist_" + name + ";py;entries", 300, -2, 2);
+        pyHist0 = new TH1D("pyHist0_" + name, "pyHist0_" + name + ";py;entries (-)", 300, -2, 2);
+        pyHist0->SetLineColor(kBlue);
+        pyHist1 = new TH1D("pyHist1_" + name, "pyHist1_" + name + ";py;entries (+)", 300, -2, 2);
+        pyHist1->SetLineColor(kRed);
 
-	pyHist		= new TH1D("pyHist_" + name,"pyHist_" + name+";py;entries"    ,		300,	-2,		2);
-	pyHist0		= new TH1D("pyHist0_"+ name,"pyHist0_"+ name+";py;entries (-)",		300,	-2,		2);		pyHist0->SetLineColor(kBlue);
-	pyHist1		= new TH1D("pyHist1_"+ name,"pyHist1_"+ name+";py;entries (+)",		300,	-2,		2);		pyHist1->SetLineColor(kRed);
+        pzHist = new TH1D("pzHist_" + name, "pzHist_" + name + ";pz;entries", 500, -1, beamMomentum * 2.5);
+        pzHist0 = new TH1D("pzHist0_" + name, "pzHist0_" + name + ";pz;entries (-)", 500, -1, beamMomentum * 2.5);
+        pzHist0->SetLineColor(kBlue);
+        pzHist1 = new TH1D("pzHist1_" + name, "pzHist1_" + name + ";pz;entries (+)", 500, -1, beamMomentum * 2.5);
+        pzHist1->SetLineColor(kRed);
 
-	pzHist = new TH1D("pzHist_" + name, "pzHist_" + name + ";pz;entries", 500, -1, beamMomentum*2.5);
-	pzHist0 = new TH1D("pzHist0_" + name, "pzHist0_" + name + ";pz;entries (-)", 500, -1, beamMomentum*2.5);	pzHist0->SetLineColor(kBlue);
-	pzHist1 = new TH1D("pzHist1_" + name, "pzHist1_" + name + ";pz;entries (+)", 500, -1, beamMomentum*2.5);	pzHist1->SetLineColor(kRed);
-
-	ptHist		= new TH1D("ptHist_" + name,"ptHist_" + name+";pt;entries "   ,		300,    0,		2);
-	ptHist0		= new TH1D("ptHist0_"+ name,"ptHist0_"+ name+";pt;entries (-)",		300,    0,		2);		ptHist0->SetLineColor(kBlue);
-	ptHist1		= new TH1D("ptHist1_"+ name,"ptHist1_"+ name+";pt;entries (+)",		300,    0,		2);		ptHist1->SetLineColor(kRed);
+        ptHist = new TH1D("ptHist_" + name, "ptHist_" + name + ";pt;entries ", 300, 0, 2);
+        ptHist0 = new TH1D("ptHist0_" + name, "ptHist0_" + name + ";pt;entries (-)", 300, 0, 2);
+        ptHist0->SetLineColor(kBlue);
+        ptHist1 = new TH1D("ptHist1_" + name, "ptHist1_" + name + ";pt;entries (+)", 300, 0, 2);
+        ptHist1->SetLineColor(kRed);
+    }
 
 	etaHist		= new TH1D("etaHist_" +name,"etaHist_" +name+";etaLab;entries"    ,	600,	0,		10);
 	etaHist0	= new TH1D("etaHist0_"+name,"etaHist0_"+name+";etaLab;entries (-)",	600,	0,		10);	etaHist0->SetLineColor(kBlue);
@@ -280,6 +340,33 @@ void OneWindHandler::Init()
 	SlopeBeamXZHist = new TH2D("BeamSlopeXZ_Mult_cloud_" + name, "BeamSlopeXZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
 	SlopeBeamYZHist = new TH2D("BeamSlopeYZ_Mult_cloud_" + name, "BeamSlopeYZ_Mult_cloud_" + name + "; N; Slope; entries", 301,	-0.5,	300.5, 100, -0.001, 0.001);
 	BeamPositionHistPSDLevelHist = new TH2D("Beam_PSD_level" + name, "Beam_PSD_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
+
+/*	BeamPositionS1LevelHist = new TH2D("Beam_S1_level" + name, "Beam_S1_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
+	BeamPositionS2LevelHist = new TH2D("Beam_S2_level" + name, "Beam_S2_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
+	BeamPositionS5LevelHist = new TH2D("Beam_S5_level" + name, "Beam_S5_level" + name + "; X; Y; entries", 400,	-5,	5, 400, -5, 5);
+
+    BeamPositionS1XSignalLevelHist = new TH2D("Beam_positionX_S1_signal_level" + name, "Beam_positionX_S1_signal_level" + name + "; X; S1_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+    BeamPositionS1YSignalLevelHist = new TH2D("Beam_positionY_S1_signal_level" + name, "Beam_positionY_S1_signal_level" + name + "; Y; S1_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+
+    BeamPositionS2XSignalLevelHist = new TH2D("Beam_positionX_S2_signal_level" + name, "Beam_positionX_S2_signal_level" + name + "; X; S2_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+    BeamPositionS2YSignalLevelHist = new TH2D("Beam_positionY_S2_signal_level" + name, "Beam_positionY_S2_signal_level" + name + "; Y; S2_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+
+    BeamPositionS5XSignalLevelHist = new TH2D("Beam_positionX_S5_signal_level" + name, "Beam_positionX_S5_signal_level" + name + "; X; S5_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+    BeamPositionS5YSignalLevelHist = new TH2D("Beam_positionY_S5_signal_level" + name, "Beam_positionY_S5_signal_level" + name + "; Y; S5_Signal; entries", 400,	-5,	5, 201, -1.5, 601.5);
+*/
+
+    if (bBeamPositionSvsSignal) {
+        BeamPositionS1vsSignalHist = new TH3D("Beam_S1signal_level" + name,
+                                              "Beam_S1signal_level" + name + "; X; Y; S1_Signal; entries", 400, -5, 5,
+                                              400, -5, 5, 201, -1.5, 601.5);
+        BeamPositionS2vsSignalHist = new TH3D("Beam_S2signal_level" + name,
+                                              "Beam_S2signal_level" + name + "; X; Y; S2_Signal; entries", 400, -5, 5,
+                                              400, -5, 5, 201, -1.5, 601.5);
+        BeamPositionS5vsSignalHist = new TH3D("Beam_S5signal_level" + name,
+                                              "Beam_S5signal_level" + name + "; X; Y; S5_Signal; entries", 400, -5, 5,
+                                              400, -5, 5, 201, -1.5, 601.5);
+    }
+
 
 	VtxTracksVsAllTracksHist = new TH2D("VtxTrVsAllTrack"+name,"VtxTrVsAllTrack" + name + "vtxTracks; GoodVtxTracks; AllTracks",301,	-0.5,	300.5, 601,	-0.5,	600.5);
 
@@ -306,6 +393,7 @@ void OneWindHandler::Init()
     BPD3SignalDifYTrackRatio = new TH2D ("BPD3SignalDifYTrackRatio_"+ name,"BPD3SignalDifYTrackRatio"+name+
             ";BPD3SumAllY - BPD3ClusterSignalY; VertexTrack/Track",300,0,15000,100,0,1);
 
+    BPD3RMSHist = new TH2D ("BPD3RMS_" + name,"BPD3RMS_"+name+";BPD3X_RMS; BPD3Y_RMS",200,0,0.5,200,0,0.5);
 }
 
 
@@ -313,14 +401,14 @@ void OneWindHandler::Init()
 void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 {
 	if (init==false) this->Init();
+
 	if (bRaw){
 		if (bEventInfoFull==false){
-			myEventInfo.Reset();
-			myEventInfo.DissectEvent(ev);
-			bEventInfoFull=true;
+            myEventInfo.Reset();
+            myEventInfo.DissectEvent(ev);
+            bEventInfoFull = true;
 		}
 	}
-	
 	if (myTrackCutList->TrackTest(vtxTrack,ev) == 0) return;
 	//cout << "put Track" << endl;
 	double_t p, pX, pY, pZ, pT, phi, eta, dEdx;
@@ -330,7 +418,7 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	pZ = vtxMomentum.GetZ();
 	p = vtxMomentum.GetMag();
 
-	phi = TMath::ATan2(pY, pX); //phi = [-pi;pi] 
+	phi = TMath::ATan2(pY, pX); //phi = [-pi;pi]
 	double mass = 0.1396;
 	double E = sqrt(pow(mass, 2) + p*p);
 	double rapidity = 0.5 * log((E + pZ) / (E - pZ)) - beamRapidity/2;
@@ -342,12 +430,13 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	dEdx = 0;
 
 	chargeHist->Fill(vtxTrack.GetCharge());
-
-	pHist->Fill(p);
-	pxHist->Fill(pX);
-	pyHist->Fill(pY);
-	pzHist->Fill(pZ);
-	ptHist->Fill(pT);
+    if (bOneWindHandlerMomentum1d) {
+        pHist->Fill(p);
+        pxHist->Fill(pX);
+        pyHist->Fill(pY);
+        pzHist->Fill(pZ);
+        ptHist->Fill(pT);
+    }
 	etaHist->Fill(eta);
 	rapHist->Fill(rapidity);
 	phiHist->Fill(phi);
@@ -355,11 +444,13 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 
 	if (vtxTrack.GetCharge() == 1)
 	{
-		pHist1->Fill(p);
-		pxHist1->Fill(pX);
-		pyHist1->Fill(pY);
-		pzHist1->Fill(pZ);
-		ptHist1->Fill(pT);
+        if (bOneWindHandlerMomentum1d) {
+            pHist1->Fill(p);
+            pxHist1->Fill(pX);
+            pyHist1->Fill(pY);
+            pzHist1->Fill(pZ);
+            ptHist1->Fill(pT);
+        }
 		etaHist1->Fill(eta);
 		rapHist1->Fill(rapidity);
 		phiHist1->Fill(phi);
@@ -370,11 +461,13 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	}
 	else
 	{
-		pHist0->Fill(p);
-		pxHist0->Fill(pX);
-		pyHist0->Fill(pY);
-		pzHist0->Fill(pZ);
-		ptHist0->Fill(pT);
+        if (bOneWindHandlerMomentum1d) {
+            pHist0->Fill(p);
+            pxHist0->Fill(pX);
+            pyHist0->Fill(pY);
+            pzHist0->Fill(pZ);
+            ptHist0->Fill(pT);
+        }
 		etaHist0->Fill(eta);
 		phiHist0->Fill(phi);
 		rapHist0->Fill(rapidity);
@@ -388,35 +481,35 @@ void OneWindHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	rapPtHist->Fill(rapidity, pT);
 	etaptHist->Fill(eta, pT);
 	ptPhiHist->Fill(phi, pT);
- 
+
     RecEvent* pRecEvent=&ev.GetRecEvent();
     const Vertex& mainVertex = pRecEvent->GetMainVertex();
 	const Point& impactPoint = vtxTrack.GetImpactPoint();
     const Vector vertexToImpact =  mainVertex.GetPosition() - impactPoint;
     const double_t bx = vertexToImpact.GetX();
     const double_t by = vertexToImpact.GetY();
-    
+
     const Track& track = pRecEvent->Get(vtxTrack.GetTrackIndex()); //Ya pomenyal
     dEdx = track.GetEnergyDeposit(evt::rec::TrackConst::eAll); //Ya pomenyal
-    
+
 	if (vtxTrack.GetCharge() == 1)
 		dEdxPHist1->Fill(log(p)/log(10),dEdx);
-	else 
+	else
 		dEdxPHist0->Fill(log(p) / log(10), dEdx);
 	ImpParHist->Fill(bx,by);
-    
+
     int nTotalTPC, nVTPC, nGTPC; //Ya pomenyal
     nTotalTPC   =   track.GetNumberOfClusters(TrackConst::eAll); //Ya pomenyal
     nVTPC       =   track.GetNumberOfClusters(TrackConst::eVTPC1) + track.GetNumberOfClusters(TrackConst::eVTPC2); //Ya pomenyal
     nGTPC       =   track.GetNumberOfClusters(TrackConst::eGTPC); //Ya pomenyal
-    
+
     totClusterHist->Fill(nTotalTPC); //Ya pomenyal
     verClusterHist->Fill(nVTPC); //Ya pomenyal
     gapClusterHist->Fill(nGTPC); //Ya pomenyal
 
 
 
-    
+
 }
 
 void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
@@ -426,42 +519,46 @@ void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 
 //	cout << "put Track SIM" << endl;
 	double_t p, pX, pY, pZ, pT, phi, eta, dEdx;
-	Vector	vtxMomentum = vtxTrack.GetMomentum(); 
+	Vector	vtxMomentum = vtxTrack.GetMomentum();
 	pX	=	vtxMomentum.GetX();
 	pY	=	vtxMomentum.GetY();
 	pZ	=	vtxMomentum.GetZ();
 	p	=	vtxMomentum.GetMag();
 
-	phi	=	TMath::ATan2(pY,pX); //phi = [-pi;pi] 
+	phi	=	TMath::ATan2(pY,pX); //phi = [-pi;pi]
 	double mass = 0.1396;
 	double E = sqrt(pow(mass, 2) + p*p);
 	double rapidity = 0.5 * log((E + pZ) / (E - pZ)) - beamRapidity/2;
 
-    
-	pT	=	sqrt(pX*pX+pY*pY);	
+
+	pT	=	sqrt(pX*pX+pY*pY);
 	eta=-0.5*TMath::Log((p-pZ)/(p+pZ));
-    
+
     dEdx = 0;
 
 	chargeHist	-> Fill(vtxTrack.GetCharge());
-	
-	pHist	->	Fill(p);	
-	pxHist	->	Fill(pX);	
-	pyHist	->	Fill(pY);	
-	pzHist	->	Fill(pZ);	
-	ptHist	->	Fill(pT);	
+
+    if (bOneWindHandlerMomentum1d){
+	    pHist	->	Fill(p);
+	    pxHist	->	Fill(pX);
+	    pyHist	->	Fill(pY);
+	    pzHist	->	Fill(pZ);
+	    ptHist	->	Fill(pT);
+    }
 	etaHist	->	Fill(eta);
 	rapHist->	Fill(rapidity);
 	phiHist ->	Fill(phi);
 
-    
+
 	if (vtxTrack.GetCharge()==1)
 	{
-		pHist1	->	Fill(p);	
-		pxHist1	->	Fill(pX);	
-		pyHist1	->	Fill(pY);	
-		pzHist1	->	Fill(pZ);	
-		ptHist1	->	Fill(pT);	
+        if (bOneWindHandlerMomentum1d) {
+            pHist1->Fill(p);
+            pxHist1->Fill(pX);
+            pyHist1->Fill(pY);
+            pzHist1->Fill(pZ);
+            ptHist1->Fill(pT);
+        }
 		etaHist1->	Fill(eta);
 		rapHist1->	Fill(rapidity);
 		phiHist1->	Fill(phi);
@@ -469,14 +566,16 @@ void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
         etaptHist1->Fill(eta,pT);
 		rapPtHist1->Fill(rapidity, pT);
         ptPhiHist1->Fill(phi,pT);
-	} 
+	}
 	if (vtxTrack.GetCharge() == -1)
 	{
-		pHist0	->	Fill(p);	
-		pxHist0	->	Fill(pX);	
-		pyHist0	->	Fill(pY);	
-		pzHist0	->	Fill(pZ);	
-		ptHist0	->	Fill(pT);	
+        if (bOneWindHandlerMomentum1d) {
+            pHist0->Fill(p);
+            pxHist0->Fill(pX);
+            pyHist0->Fill(pY);
+            pzHist0->Fill(pZ);
+            ptHist0->Fill(pT);
+        }
 		etaHist0->	Fill(eta);
 		phiHist0->	Fill(phi);
 		rapHist0->	Fill(rapidity);
@@ -485,12 +584,12 @@ void OneWindHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 		rapPtHist0->Fill(rapidity, pT);
         ptPhiHist0->Fill(phi,pT);
 	}
-	
+
     //acceptHist  -> Fill(phi,pT,eta);
 	rapPtHist->Fill(rapidity, pT);
     etaptHist->Fill(eta,pT);
     ptPhiHist->Fill(phi,pT);
-    
+
 	if (vtxTrack.GetCharge() == 1)
 		dEdxPHist1->Fill(log(p) / log(10), dEdx);
 	if (vtxTrack.GetCharge() == -1)
@@ -503,9 +602,9 @@ void OneWindHandler::EndOfEvent(Event& ev)
     double N = nTracks0 + nTracks1;
 	multHist->Fill(N);
 //    plusminusHist -> Fill(nTracks0,nTracks1);
- 
-	
-    
+
+
+
 	bEventInfoFull = false;
 	fitVtxHist	->Fill(myEventInfo.myFitVtxZ);
 	fitVtxNHist->Fill(myEventInfo.myFitVtxZ, N); //Ya pomenyal
@@ -513,6 +612,7 @@ void OneWindHandler::EndOfEvent(Event& ev)
 	BPD2Hist	->Fill(myEventInfo.myBPD[2],myEventInfo.myBPD[3]);
 	BPD3Hist	->Fill(myEventInfo.myBPD[4],myEventInfo.myBPD[5]);
 	psdEnergyHist->Fill(myEventInfo.myEnergyPSD);
+    psdEnergyHist16->Fill(myEventInfo.myEnergyPSD16);
     BPD1XMultHist -> Fill(N,myEventInfo.myBPD[0]);
     BPD1YMultHist -> Fill(N,myEventInfo.myBPD[1]);
     BPD2XMultHist -> Fill(N,myEventInfo.myBPD[2]);
@@ -524,14 +624,43 @@ void OneWindHandler::EndOfEvent(Event& ev)
     SlopeBeamYZHist ->Fill(N, myEventInfo.myBeamSlopeZY);
 	BeamPositionHistPSDLevelHist->Fill(myEventInfo.myBeamPositionAtPSDX, myEventInfo.myBeamPositionAtPSDY);
 
+/*    BeamPositionS1LevelHist->Fill(myEventInfo.myBeamPositionAtS1X, myEventInfo.myBeamPositionAtS1Y);
+    BeamPositionS2LevelHist->Fill(myEventInfo.myBeamPositionAtS2X, myEventInfo.myBeamPositionAtS2Y);
+    BeamPositionS5LevelHist->Fill(myEventInfo.myBeamPositionAtS5X, myEventInfo.myBeamPositionAtS5Y);
+
+    BeamPositionS1XSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS1X, myEventInfo.myS1ADC);
+    BeamPositionS1YSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS1Y, myEventInfo.myS1ADC);
+    BeamPositionS2XSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS2X, myEventInfo.myS2ADC);
+    BeamPositionS2YSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS2Y, myEventInfo.myS2ADC);
+    BeamPositionS5XSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS5X, myEventInfo.myS5ADC);
+    BeamPositionS5YSignalLevelHist->Fill(myEventInfo.myBeamPositionAtS5Y, myEventInfo.myS5ADC);
+*/
+    if (bBeamPositionSvsSignal) {
+        BeamPositionS1vsSignalHist->Fill(myEventInfo.myBeamPositionAtS1X, myEventInfo.myBeamPositionAtS1Y,
+                                         myEventInfo.myS1ADC);
+        BeamPositionS2vsSignalHist->Fill(myEventInfo.myBeamPositionAtS2X, myEventInfo.myBeamPositionAtS2Y,
+                                         myEventInfo.myS2ADC);
+        BeamPositionS5vsSignalHist->Fill(myEventInfo.myBeamPositionAtS5X, myEventInfo.myBeamPositionAtS5Y,
+                                         myEventInfo.myS5ADC);
+    }
+
 	psdEnergyNHist->Fill(myEventInfo.myEnergyPSD, N);
 	psdEnergyS5Hist->Fill(myEventInfo.myEnergyPSD, myEventInfo.myS5ADC);
 	multS5Hist->Fill(myEventInfo.myS5ADC, N);
-    
+    S1S2Hist->Fill(myEventInfo.myS1ADC,myEventInfo.myS2ADC);
+
     nBeamHist->Fill(myEventInfo.myTimeStructureWFA.size()); //Ya pomenyal
     for (unsigned int i = 0; i < myEventInfo.myTimeStructureWFA.size(); ++i){ //Ya pomenyal
-        WFAHist->Fill(myEventInfo.myTimeStructureWFA.at(i)-(wfaTime1 + wfaTime2) / 2.); //Ya pomenyal
+        WFAHist->Fill(myEventInfo.myTimeStructureWFA.at(i));//-(wfaTime1 + wfaTime2) / 2.); //Ya pomenyal
     }; //Ya pomenyal
+    for (unsigned int i = 0; i < myEventInfo.myTimeStructureWFAT4.size(); ++i){ //Ya pomenyal
+        WFAT4Hist->Fill(myEventInfo.myTimeStructureWFAT4.at(i)); //Ya pomenyal
+    };
+
+    for (unsigned int i = 0; i < myEventInfo.myTimeStructureMHTDC.size(); ++i){ //Ya pomenyal
+        MHTDCHist->Fill(myEventInfo.myTimeStructureMHTDC.at(i)); //Ya pomenyal
+    };
+
 
 
     double nTracks = 0;
@@ -543,7 +672,7 @@ void OneWindHandler::EndOfEvent(Event& ev)
         const rec::Track& track = *trackIter;
         nTracks++;
     }
-    //N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
+    N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
 
 
 
@@ -561,6 +690,8 @@ void OneWindHandler::EndOfEvent(Event& ev)
     BPD3SignalRatioYTrackRatio ->Fill(myEventInfo.myBPD3SignalY / myEventInfo.myBPD3SumAllY,N/nTracks);
     BPD3SignalDifXTrackRatio ->Fill(myEventInfo.myBPD3SumAllX - myEventInfo.myBPD3SignalX ,N/nTracks);
     BPD3SignalDifYTrackRatio ->Fill(myEventInfo.myBPD3SumAllX - myEventInfo.myBPD3SignalX,N/nTracks);
+
+    BPD3RMSHist->Fill(myEventInfo.myBPD3XRMS, myEventInfo.myBPD3YRMS);
 
 
     nTracks0=0; //Ya pomenyal
@@ -590,31 +721,31 @@ void LRCHandler::Init()
 	nTracksB0	= 0;		nTracksF0	= 0;
 	nTracksB1	= 0;		nTracksF1	= 0;
 	nTracks0	= 0;		nTracks1	= 0;
-	
+
 	chargeB		= 0;		chargeF		= 0;
 
 	sumPtB		= 0;		sumPtF		= 0;
 	sumPtB0		= 0;		sumPtF0		= 0;
 	sumPtB1		= 0;		sumPtF1		= 0;
-    
-    
+
+
     shalala     = 0;
-    
+
 	// --- hists
 	TString name = myEventCutList->GetName() + myTrackCutList->GetName() + "_Back_" +
 		myBackwardTrackCutList->GetName() + "_For_" + myForwardTrackCutList->GetName();
 
 	if (bSim==true) name = name + "_Sim";
-	else { 
+	else {
 		if (bRaw == false)
 			name = name + "_Rec";
-		else 
+		else
 			name = name + "_Raw";
 	}
 	myNameHist = name;
-	NetChHist	= new TH2D("NetCh_correlation_cloud_all"+myNameHist,myNameHist+			"; Qf; Qb; entries",	
+	NetChHist	= new TH2D("NetCh_correlation_cloud_all"+myNameHist,myNameHist+			"; Qf; Qb; entries",
 		21,-10.5,10.5,	21,-10.5,10.5);
-	TestPtPtHist = new TH2D("TEST_ALL_PTPT"+name, "TEST_ALL_PTPT_"+name+ ";pt_f_all;pt_b_all; entries", 
+	TestPtPtHist = new TH2D("TEST_ALL_PTPT"+name, "TEST_ALL_PTPT_"+name+ ";pt_f_all;pt_b_all; entries",
 		arNBins[2], arXmin[2], arXmax[2],  arNBins[2], arXmin[2], arXmax[2]);
 
 
@@ -639,17 +770,17 @@ void LRCHandler::AddBackwardCut(TrackCut* cut)
 LRCHandler::~LRCHandler()
 {
 	cout<<"LRCHandler destructor are starting ..."<<endl;
-	//--- output results 
+	//--- output results
 	cout<<"name outFile = "<<nameOutFile<<endl;
 	TFile outputFile(nameOutFile, "RECREATE");
 	outputFile.cd();
-	cout<<"writing..."<<endl; 
+	cout<<"writing..."<<endl;
 
 //	TH2D*	NetChHist	= new TH2D("NetCh_correlation_cloud_all"+myNameHist,myNameHist+			"; Qf; Qb; entries",		21,-10.5,10.5,	21,-10.5,10.5);
 
 	TH2D*   ArNNHist[nChargeComb];
 	TH2D*	ArPtNHist[nChargeComb];
-	TH2D*	ArPtPtHist[nChargeComb]; 
+	TH2D*	ArPtPtHist[nChargeComb];
 
 	//ALL__POS__NEG___ForNEG_BackPOS____ForPOS_BackNEG
 
@@ -672,18 +803,18 @@ LRCHandler::~LRCHandler()
 	ArPtPtHist[4]	= new TH2D("PtPt_correlation_cloud_pos_neg"+myNameHist,myNameHist+	"; PtF(+);PtB(-);entries",	31,0,1.5,	31,0,1.5);
 
 	THnSparseD* ArSparse[nChargeComb];
-	ArSparse[0] =		myAllChargeTHSparse;	
-	ArSparse[1] =		myPositiveTHSparse;		
-	ArSparse[2] =		myNegativeTHSparse;		
+	ArSparse[0] =		myAllChargeTHSparse;
+	ArSparse[1] =		myPositiveTHSparse;
+	ArSparse[2] =		myNegativeTHSparse;
 	ArSparse[3] =		myPosBackNegForTHSparse;
 	ArSparse[4] =		myNegBackPosForTHSparse;
-	
+
 	Long64_t nEntries=0;
 	for (Long64_t i = 0; i<nChargeComb; i++){
 		nEntries = ArSparse[i]->GetNbins();
 		double_t NF, NB, PtF, PtB;
 		double_t binContent = 0;
-		Int_t pCoord[nBins] = {0}; 
+		Int_t pCoord[nBins] = {0};
 		double_t arVal[nBins] = {0};
 		for (int j=0; j<nEntries; j++){
 			binContent = ArSparse[i] -> GetBinContent(j,pCoord);
@@ -692,8 +823,8 @@ LRCHandler::~LRCHandler()
 			NF = arVal[0];
 			NB = arVal[1];
 			PtF = arVal[2];
-			PtB = arVal[3]; 
-			
+			PtB = arVal[3];
+
 			ArNNHist[i]			->Fill(NF, NB, binContent);
 			if (NB != 0)
 				ArPtNHist[i]	->Fill(NF, PtB, binContent);
@@ -702,7 +833,7 @@ LRCHandler::~LRCHandler()
 
 		}
 	}
-	
+
 	//psdEnergyHist->Write();
 	TH1F* eventStat = myEventCutList->GetStatHist(nameOutFile+myNameHist, bSim);
 	TH1F* trackStat = myTrackCutList->GetStatHist(nameOutFile+myNameHist, bSim);
@@ -717,7 +848,7 @@ LRCHandler::~LRCHandler()
 		ArPtNHist[i]->Write();
 		ArPtPtHist[i]->Write();
 	}
-	
+
 
 	cout<<"closing..."<<endl;
 	outputFile.Close();
@@ -741,18 +872,18 @@ void LRCHandler::PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
 	if (charge == -1)
 		nTracks0++;
 
-	if (myBackwardTrackCutList->TrackTest(vtxTrack,ev) == 0) 
+	if (myBackwardTrackCutList->TrackTest(vtxTrack,ev) == 0)
 		addB = false;
 	if (myForwardTrackCutList->TrackTest(vtxTrack,ev) == 0)
 		addF = false;
 	if (addB == false && addF == false) return;
 
 	double_t pX, pY, pT;
-	const Vector vtxMomentum = vtxTrack.GetMomentum(); 
+	const Vector vtxMomentum = vtxTrack.GetMomentum();
 	pX	=	vtxMomentum.GetX();
 	pY	=	vtxMomentum.GetY();
 	pT	=	sqrt(pX*pX+pY*pY);
-    
+
 	if (addB){
 		nTracksB++;
 		sumPtB = sumPtB + pT;
@@ -793,18 +924,18 @@ void LRCHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 	if (charge == -1)
 		nTracks0++;
 
-	if (myBackwardTrackCutList->TrackTest(vtxTrack,ev) == 0) 
+	if (myBackwardTrackCutList->TrackTest(vtxTrack,ev) == 0)
 		addB = false;
 	if (myForwardTrackCutList->TrackTest(vtxTrack,ev) == 0)
 		addF = false;
 	if (addB == false && addF == false) return;
 
 	double_t pX, pY, pT;
-	const Vector vtxMomentum = vtxTrack.GetMomentum(); 
+	const Vector vtxMomentum = vtxTrack.GetMomentum();
 	pX	=	vtxMomentum.GetX();
 	pY	=	vtxMomentum.GetY();
 	pT	=	sqrt(pX*pX+pY*pY);
-    
+
 	if (addB){
 		nTracksB++;
 		sumPtB = sumPtB + pT;
@@ -839,25 +970,25 @@ void LRCHandler::EndOfEvent(Event& ev)
 	NetChHist->Fill(qF, qB);
 
 	if ((nTracksF1 + nTracksF0 != 0) && (nTracksB1 + nTracksB0 != 0))
-		TestPtPtHist->Fill((sumPtF1 + sumPtF0)/(nTracksF1 + nTracksF0), 
+		TestPtPtHist->Fill((sumPtF1 + sumPtF0)/(nTracksF1 + nTracksF0),
 				(sumPtB1 + sumPtB0)/(nTracksB1 + nTracksB0));
 
 	Double_t arValLRC[nBins] = {0};
 	arValLRC[nBins-1] = myHistInSparseCounter;
-	myHistInSparseCounter++; 
+	myHistInSparseCounter++;
 	if (myHistInSparseCounter == arNBins[nBins-1])
 		myHistInSparseCounter = 0;
 
-	//All charges  
+	//All charges
 	arValLRC[0] = nTracksF1 + nTracksF0;
 	arValLRC[1] = nTracksB1 + nTracksB0;
 	if (nTracksF1 + nTracksF0 != 0)
 		arValLRC[2] = (sumPtF1 + sumPtF0)/(nTracksF1 + nTracksF0);
-	else 
+	else
 		arValLRC[2] = 0;
 	if (nTracksB1 + nTracksB0 != 0)
 		arValLRC[3] = (sumPtB1 + sumPtB0)/(nTracksB1 + nTracksB0);
-	else 
+	else
 		arValLRC[3] = 0;
 	myAllChargeTHSparse->Fill(arValLRC);
 
@@ -866,11 +997,11 @@ void LRCHandler::EndOfEvent(Event& ev)
 	arValLRC[1] = nTracksB1;
 	if (nTracksF1 != 0)
 		arValLRC[2] = (sumPtF1)/(nTracksF1);
-	else 
+	else
 		arValLRC[2] = 0;
 	if (nTracksB1 != 0)
 		arValLRC[3] = (sumPtB1)/(nTracksB1);
-	else 
+	else
 		arValLRC[3] = 0;
 	myPositiveTHSparse->Fill(arValLRC);
 
@@ -879,11 +1010,11 @@ void LRCHandler::EndOfEvent(Event& ev)
 	arValLRC[1] = nTracksB0;
 	if (nTracksF0 != 0)
 		arValLRC[2] = (sumPtF0)/(nTracksF0);
-	else 
+	else
 		arValLRC[2] = 0;
 	if (nTracksB0 != 0)
 		arValLRC[3] = (sumPtB0)/(nTracksB0);
-	else 
+	else
 		arValLRC[3] = 0;
 	myNegativeTHSparse->Fill(arValLRC);
 
@@ -892,24 +1023,24 @@ void LRCHandler::EndOfEvent(Event& ev)
 	arValLRC[1] = nTracksB1;
 	if (nTracksF0 != 0)
 		arValLRC[2] = (sumPtF0)/(nTracksF0);
-	else 
+	else
 		arValLRC[2] = 0;
 	if (nTracksB1 != 0)
 		arValLRC[3] = (sumPtB1)/(nTracksB1);
-	else 
+	else
 		arValLRC[3] = 0;
 	myPosBackNegForTHSparse->Fill(arValLRC);
 
-	//Positive -> Forward, Negative -> Backward 
+	//Positive -> Forward, Negative -> Backward
 	arValLRC[0] = nTracksF1;
 	arValLRC[1] = nTracksB0;
 	if (nTracksF1 != 0)
 		arValLRC[2] = (sumPtF1)/(nTracksF1);
-	else 
+	else
 		arValLRC[2] = 0;
 	if (nTracksB0 != 0)
 		arValLRC[3] = (sumPtB0)/(nTracksB0);
-	else 
+	else
 		arValLRC[3] = 0;
 	myNegBackPosForTHSparse->Fill(arValLRC);
 
@@ -923,15 +1054,15 @@ void LRCHandler::EndOfEvent(Event& ev)
 
 	sumPtB		= 0;		sumPtF		= 0;
 	sumPtB0		= 0;		sumPtF0		= 0;
-	sumPtB1		= 0;		sumPtF1		= 0; 
+	sumPtB1		= 0;		sumPtF1		= 0;
     shalala     = 0;
 }
 
 //bool PhiGeneralization (double_t& minPhi, double_t& maxPhi)
 //{
-//    if (minPhi>=maxPhi) 
+//    if (minPhi>=maxPhi)
 //    {
-//        cout << "maxPhi < or = minPhi => phiSelection is closed" << endl; 
+//        cout << "maxPhi < or = minPhi => phiSelection is closed" << endl;
 //        return 0;
 //    }
 //    double pi = TMath::Pi();
@@ -1057,7 +1188,7 @@ void BaseHandler::RemoveBadRuns()
 
 void BaseHandler::AddZVtxCut(double_t minZ, double_t maxZ)
 {
-    if (minZ>maxZ) 
+    if (minZ>maxZ)
         cout<<"Error. Can't add ZVertexCut with minZ > maxZ"<<endl;
 	else {
         Cut* A = new ZVertexCut(minZ, maxZ);
@@ -1075,12 +1206,12 @@ void BaseHandler::AddCentrality(double_t minPer, double_t maxPer)
 		cout<<"Error. Can't add centrality cut with maxPer < 0 or >1"<<endl;
 		return;
 	}
-	
+
 	if (minPer>=maxPer){
         cout<<"Error. Can't add centrality cut with minPer >= maxPer"<<endl;
 		return;
 	}
-	
+
 	if (this->IsItRaw()){
 		Cut* A = new CentralityCut(minPer,maxPer,1);
 		myEventCutList->AddCut(A);
@@ -1104,7 +1235,7 @@ void BaseHandler::AddImpactPointCut()
 
 void BaseHandler::AddImpactPointCut(double_t max_dX, double_t max_dY)
 {
-    if (max_dX <= 0) 
+    if (max_dX <= 0)
         cout<<"Error. Can't add ImpactPointCut with dX<=0"<<endl;
     else if (max_dY <= 0)
         cout<<"Error. Can't add ImpactPointCut with dY<=0"<<endl;
@@ -1199,7 +1330,7 @@ void BaseHandler::AddEECut()
 
 void BaseHandler::AddEtaCut(double_t minEta, double_t maxEta)
 {
-	if (minEta>maxEta) 
+	if (minEta>maxEta)
 		cout<<nameOutFile<<": Error. minEta>maxEta"<<endl;
 	Cut* A = new EtaCut(minEta, maxEta);
 	myTrackCutList->AddCut(A);
@@ -1207,9 +1338,9 @@ void BaseHandler::AddEtaCut(double_t minEta, double_t maxEta)
 
 void BaseHandler::AddPhiCut(double_t minPhi, double_t maxPhi)
 {
-	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi())) 
+	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi()))
 		cout<<nameOutFile<<": warning. phi = [-pi;pi]"<<endl;
-	if (minPhi>maxPhi) 
+	if (minPhi>maxPhi)
 		cout<<nameOutFile<<": Error. minPhi>maxPhi"<<endl;
 	Cut* A = new PhiCut(minPhi, maxPhi);
 	myTrackCutList->AddCut(A);
@@ -1259,6 +1390,12 @@ void BaseHandler::AddS5Cut(double upLimit)
 	myEventCutList->AddCut(A);
 }
 
+void BaseHandler::AddS2Cut(double upLimit)
+{
+    Cut* A = new S2Cut(upLimit, bRaw);
+    myEventCutList->AddCut(A);
+}
+
 void BaseHandler::AddRunNumberCut(int lowLimit, int upLimit)
 {
 	Cut* A = new RunNumberCut(lowLimit,upLimit,bRaw);
@@ -1279,9 +1416,9 @@ void BaseHandler::AddBeamSlopeCut(double minSlope, double maxSlope, eBeamSlopePl
 
 void LRCHandler::AddPhiForward(double_t minPhi, double_t maxPhi)
 {
-	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi())) 
+	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi()))
 		cout<<nameOutFile<<": warning. phi = [-pi;pi]"<<endl;
-	if (minPhi>maxPhi) 
+	if (minPhi>maxPhi)
 		cout<<nameOutFile<<": Error. minPhi>maxPhi"<<endl;
 	Cut* A = new PhiCut(minPhi, maxPhi);
 	myForwardTrackCutList->AddCut(A);
@@ -1289,9 +1426,9 @@ void LRCHandler::AddPhiForward(double_t minPhi, double_t maxPhi)
 
 void LRCHandler::AddPhiBackward(double_t minPhi, double_t maxPhi)
 {
-	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi())) 
+	if (minPhi<(-1*TMath::Pi()) || maxPhi>(TMath::Pi()))
 		cout<<nameOutFile<<": warning. phi = [-pi;pi]"<<endl;
-	if (minPhi>maxPhi) 
+	if (minPhi>maxPhi)
 		cout<<nameOutFile<<": Error. minPhi>maxPhi"<<endl;
 	Cut* A = new PhiCut(minPhi, maxPhi);
 	myBackwardTrackCutList->AddCut(A);
@@ -1299,7 +1436,7 @@ void LRCHandler::AddPhiBackward(double_t minPhi, double_t maxPhi)
 
 void LRCHandler::AddEtaForward(double_t minEta, double_t maxEta)
 {
-	if (minEta>maxEta) 
+	if (minEta>maxEta)
 		cout<<nameOutFile<<": Error. minEta>maxEta"<<endl;
 	Cut* A = new EtaCut(minEta, maxEta);
 	myForwardTrackCutList->AddCut(A);
@@ -1308,7 +1445,7 @@ void LRCHandler::AddEtaForward(double_t minEta, double_t maxEta)
 
 void LRCHandler::AddEtaBackward(double_t minEta, double_t maxEta)
 {
-	if (minEta>maxEta) 
+	if (minEta>maxEta)
 		cout<<nameOutFile<<": Error. minEta>maxEta"<<endl;
 	Cut* A = new EtaCut(minEta, maxEta);
 	myBackwardTrackCutList->AddCut(A);
@@ -1319,7 +1456,7 @@ void LRCHandler::AddPtForward(double_t minPt, double_t maxPt)
 {
 	if (minPt<0)
 		cout<<nameOutFile<<": Error. minPt<0"<<endl;
-	if (minPt>maxPt) 
+	if (minPt>maxPt)
 		cout<<nameOutFile<<": Error. minPt>maxPt"<<endl;
 	Cut* A = new PtCut(minPt, maxPt);
 	myForwardTrackCutList->AddCut(A);
@@ -1329,11 +1466,11 @@ void LRCHandler::AddPtBackward(double_t minPt, double_t maxPt)
 {
 	if (minPt<0)
 		cout<<nameOutFile<<": Error. minPt<0"<<endl;
-	if (minPt>maxPt) 
+	if (minPt>maxPt)
 		cout<<nameOutFile<<": Error. minPt>maxPt"<<endl;
 	Cut* A = new PtCut(minPt, maxPt);
 	myBackwardTrackCutList->AddCut(A);
-} 
+}
 
 void BaseHandler::AddPSDTimeStampCut(unsigned int maxOkSectionsWith0)
 {
@@ -1383,6 +1520,17 @@ void BaseHandler::AddZeroPositiveTracksCut()
 	myEventCutList->AddCut(A);
 }
 
+void BaseHandler::AddBeamPositionInSCut(eMyS sType, eMyCoordinate coord, double lowBound, double upBound)
+{
+    Cut* A  = new BeamPositionInS(sType, coord, lowBound, upBound, bRaw);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddBPD3RMS()
+{
+    Cut* A  = new BPD3RMS();
+    myEventCutList->AddCut(A);
+}
 
 void StatEventInfo::Reset()
 {
@@ -1390,21 +1538,33 @@ void StatEventInfo::Reset()
         myFitVtxX = 0;
         myFitVtxY = 0;
 		myFitVtxZ = 0;
-		for (int i = 0; i<6; i++) 
+		for (int i = 0; i<6; i++)
 			myBPD[i] = 0;
         myBeamSlopeZX = 0;
         myBeamSlopeZY = 0;
 		myBeamPositionAtPSDX = 0;
 		myBeamPositionAtPSDY = 0;
+        myBeamPositionAtS1X = 0;
+        myBeamPositionAtS1Y = 0;
+        myBeamPositionAtS2X = 0;
+        myBeamPositionAtS2Y = 0;
+        myBeamPositionAtS5X = 0;
+        myBeamPositionAtS5Y = 0;
 		myEnergyPSD = 0;
         myTimeStructureWFA.push_back(100); //Ya pomenyal
+        myTimeStructureWFAT4.push_back(100);
+        myTimeStructureMHTDC.push_back(100);
 		myReset = true;
 		myRunNumber = 0;
 		myS5ADC = 0;
+        myS1ADC = 0;
+        myS2ADC = 0;
         myBPD3SignalX = 0;
         myBPD3SignalY = 0;
         myBPD3SumAllX = 0;
         myBPD3SumAllY = 0;
+        myBPD3XRMS = 0;
+        myBPD3YRMS = 0;
         myEnergyPSD44 = 0;
         myEnergyPSD16 = 0;
         myEnergyPSD28per = 0;
@@ -1437,18 +1597,21 @@ void StatEventInfo::DissectEvent(Event &event)
         myFitVtxX = Vertex.GetX();
         myFitVtxY = Vertex.GetY();
 
-        
-        
         const raw::Trigger& trigger = event.GetRawEvent().GetBeam().GetTrigger(); //Ya pomenyal
         
         myTimeStructureWFA.clear();//Ya pomenyal
+        myTimeStructureWFAT4.clear();
+        myTimeStructureMHTDC.clear();
         
         
         myTimeStructureWFA = trigger.GetTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eS1_1); //Ya pomenyal
-        
-        
-		
-		PSD& psd = pRecEvent->GetPSD();
+        myTimeStructureWFAT4 = trigger.GetTimeStructure(det::TimeStructureConst::eWFA, det::TriggerConst::eT4);
+         if (beamMomentum == 150 && systemType == ArSc) {}
+         else
+             myTimeStructureMHTDC = trigger.GetTimeStructure(det::TimeStructureConst::eMHTDC, det::TriggerConst::eT4);
+
+
+        PSD& psd = pRecEvent->GetPSD();
 		for (int i=0; i<nPSDMods; i++)
 			myEnergyPSD = myEnergyPSD + psd.GetModule(i+1).GetEnergy();
 
@@ -1459,14 +1622,27 @@ void StatEventInfo::DissectEvent(Event &event)
         for (int i =16; i<44; i++)
             myEnergyPSD28per = myEnergyPSD28per + psd.GetModule(i+1).GetEnergy();
 
+
         myBeamSlopeZX = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetSlope();
         myBeamSlopeZY = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetSlope();
 		myBeamPositionAtPSDX = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(2200 - 580);
 		myBeamPositionAtPSDY = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(2200 - 580);
 
-		myRunNumber = event.GetEventHeader().GetRunNumber();
+        myBeamPositionAtS1X = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S1Z);//42);// - 580);
+        myBeamPositionAtS1Y = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S1Z);//42);// - 580);
+        myBeamPositionAtS2X = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S2Z);// - 580);
+        myBeamPositionAtS2Y = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S2Z);// - 580);
+        myBeamPositionAtS5X = pRecEvent->GetBeam().Get(det::BPDConst::eX).GetValueAtZ(S5Z);
+        myBeamPositionAtS5Y = pRecEvent->GetBeam().Get(det::BPDConst::eY).GetValueAtZ(S5Z);
+
+
+
+
+        myRunNumber = event.GetEventHeader().GetRunNumber();
 
 		myS5ADC = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
+        myS1ADC = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS1);
+        myS2ADC = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS2);
 
         myBPD3SignalX = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetCharge();
         myBPD3SignalY = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetCharge();
@@ -1474,9 +1650,12 @@ void StatEventInfo::DissectEvent(Event &event)
         myBPD3SumAllX = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetSumOfAll();
         myBPD3SumAllY = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetSumOfAll();
 
-		myReset = false;
+        myBPD3XRMS = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3x).GetRMS();
+        myBPD3YRMS = pRecEvent->GetBeam().GetBPDPlane(det::BPDConst::eBPD3y).GetRMS();
 
-	}
+        myReset = false;
+
+    }
 }
 
 void StatPSDInfo::DissectEvent(Event &event)
@@ -2026,7 +2205,8 @@ TimeHandler::~TimeHandler()
 	multHist->Write();
 	psdEnergyHist->Write();
 
-	pHist->Write();
+
+    pHist->Write();
 	ptHist->Write();
 	phiHist->Write();
 
@@ -2230,7 +2410,7 @@ PSDHandler::~PSDHandler()
 
 void PSDHandler::Init()
 {
-    cout << "initialisation of the PSD module handler" << endl;
+//    cout << "initialisation of the PSD module handler" << endl;
     init = true;
     TString string1;
     if (bSim == true) string1 = "Sim";
@@ -2278,10 +2458,15 @@ void PSDHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 }
 
 
+
 void PSDHandler::EndOfEvent(Event & ev) {
     if (init == false) { this->Init(); }
     double arVal[nBinsPSDModules] = {0};
-    arVal[0] = nTracks0 + nTracks1;
+    if (bT1) {
+        arVal[0] = ev.GetRecEvent().GetNumberOf<rec::Track>();
+    }
+    else
+        arVal[0] = nTracks0 + nTracks1;
     RecEvent *pRecEvent = &ev.GetRecEvent();
     PSD &psd = pRecEvent->GetPSD();
     for (int i = 1; i < nBinsPSDModules; i++)

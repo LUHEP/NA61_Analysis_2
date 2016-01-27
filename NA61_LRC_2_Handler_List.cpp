@@ -150,56 +150,62 @@ void HandlerList::EatEvent(Event &event)
 	} 
 
 	
-	if (hasRecHandler==true){
+	if (hasRecHandler==true) {
+		RecEvent &recEvent = event.GetRecEvent();
 
-		RecEvent& recEvent = event.GetRecEvent();
-		
-		if (hasRawHandler == false){
-			Vertex& mainVertex = recEvent.GetMainVertex();
+		if (hasRawHandler == false) {
+			Vertex &mainVertex = recEvent.GetMainVertex();
 			//new 
 			for (VertexTrackIndexIterator vtxTrackIter = mainVertex.DaughterTracksBegin();
-				vtxTrackIter != mainVertex.DaughterTracksEnd(); ++vtxTrackIter){
-			//for (list<evt::rec::VertexTrack>::const_iterator iTrack = recEvent.Begin<evt::rec::VertexTrack>();
-			//	iTrack != recEvent.End<evt::rec::VertexTrack>(); ++iTrack) {
+				 vtxTrackIter != mainVertex.DaughterTracksEnd(); ++vtxTrackIter) {
+				//for (list<evt::rec::VertexTrack>::const_iterator iTrack = recEvent.Begin<evt::rec::VertexTrack>();
+				//	iTrack != recEvent.End<evt::rec::VertexTrack>(); ++iTrack) {
 
 				CutList::trackCutChecking.Reset();
 
-       			//const evt::rec::VertexTrack& vtxTrack = *iTrack;
+				//const evt::rec::VertexTrack& vtxTrack = *iTrack;
 				//Vertex& mainVertex = recEvent.GetMainVertex();
-				VertexTrack& vtxTrack = recEvent.Get(*vtxTrackIter);
+				VertexTrack &vtxTrack = recEvent.Get(*vtxTrackIter);
 				if (vtxTrack.GetStartVertexIndex() != mainVertex.GetIndex())
-					continue;        
-				for (int i=0; i<length; i++){
-					if (pGoodEvent[i]){
-						if (this->GetValue(i)->GetSim()==false){
+					continue;
+				for (int i = 0; i < length; i++) {
+					if (pGoodEvent[i]) {
+						if (this->GetValue(i)->GetSim() == false) {
 							this->GetValue(i)->PutTrack(vtxTrack, event);
 						}
 					}
 				}
-			}		
-		}else{
-			Vertex& mainVertex = recEvent.GetMainVertex();
-			//new 
-			for (VertexTrackIndexIterator vtxTrackIter = mainVertex.DaughterTracksBegin();
-				 vtxTrackIter != mainVertex.DaughterTracksEnd(); ++vtxTrackIter){		
-			//old
-//			for (list<evt::rec::VertexTrack>::const_iterator iTrack = recEvent.Begin<evt::rec::VertexTrack>();
-//				iTrack != recEvent.End<evt::rec::VertexTrack>(); ++iTrack) {
-				CutList::trackCutChecking.Reset();
-
-				VertexTrack& vtxTrack = recEvent.Get(*vtxTrackIter);
-
-				for (int i=0; i<length; i++){
-					if (pGoodEvent[i]){
-						this->GetValue(i)->PutTrack(vtxTrack, event);
+			}
+		} else {
+			if (bT1) {
+				for (int i = 0; i < length; i++) {
+					if (pGoodEvent[i]) {
+                        if (this->init == false)
+						    this->GetValue(i)->Init();
 					}
 				}
 			}
+			else {
+				Vertex &mainVertex = recEvent.GetMainVertex();
+			//new 
+				for (VertexTrackIndexIterator vtxTrackIter = mainVertex.DaughterTracksBegin();
+			 			vtxTrackIter != mainVertex.DaughterTracksEnd(); ++vtxTrackIter) {
+				//old
+//			for (list<evt::rec::VertexTrack>::const_iterator iTrack = recEvent.Begin<evt::rec::VertexTrack>();
+//				iTrack != recEvent.End<evt::rec::VertexTrack>(); ++iTrack) {
+					CutList::trackCutChecking.Reset();
 
-
-				//const evt::rec::VertexTrack& vtxTrack = *iTrack;
+					VertexTrack &vtxTrack = recEvent.Get(*vtxTrackIter);
+					for (int i = 0; i < length; i++) {
+						if (pGoodEvent[i]) {
+							this->GetValue(i)->PutTrack(vtxTrack, event);
+						}
+					}
+				}
+			//const evt::rec::VertexTrack& vtxTrack = *iTrack;
 			}
 		}
+	}
 	//}
 	if (hasSimHandler==true){
 //		cout<<"SIM"<<endl;
