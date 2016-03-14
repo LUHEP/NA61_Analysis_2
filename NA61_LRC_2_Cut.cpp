@@ -3029,7 +3029,7 @@ bool FPGACut::CheckEvent(Event &event, bool bSim)
     return false;
 }
 
-
+TRandom S5CloudCut::myRand;
 S5CloudCut::S5CloudCut(double S5, double maxN, double maxPSD28, eMultiplicityType multType, bool bRaw)
 {
     TString name;
@@ -3048,11 +3048,15 @@ S5CloudCut::S5CloudCut(double S5, double maxN, double maxPSD28, eMultiplicityTyp
     myMultType = multType;
     myS5 = S5;
 
+    double tmp = myRand.Uniform(0,100);
+    cout<<"TMP "<<tmp<<endl;
 	char name2[50];
 	sprintf(name2,"_%d_%d_%d",myS5,maxN,maxPSD28);
 
     my_Name = "S5CloudCut"+name+name2;
     my_Short_Name = "S5Cloud"+name+name2;
+    sprintf(name2,"%d",tmp);
+    TString strTmp = name2;
 
     myMultCoord[0] = maxN;
     myMultCoord[1] = 0;
@@ -3060,8 +3064,8 @@ S5CloudCut::S5CloudCut(double S5, double maxN, double maxPSD28, eMultiplicityTyp
     myPSD28Coord[0] = 0;
     myPSD28Coord[1] = maxPSD28;
     myPSD28Coord[2] = 0;
-    myTriangleZone = new TCutG(my_Name,3,myMultCoord, myPSD28Coord);
-
+    myTriangleZone = new TCutG(strTmp,3,myMultCoord, myPSD28Coord);
+    cout<<"NAME: "<<myTriangleZone->GetName()<<endl;
 }
 
 bool S5CloudCut::CheckEvent(Event &ev, bool bSim)

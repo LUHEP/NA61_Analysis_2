@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 0;
+	const int N0 = 3;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -141,7 +141,11 @@ int main(int argc, char* argv[])
 
         arOneWindHandler[i]->AddStandardCutsRaw();
         if (i==1)
-			arOneWindHandler[i]->AddS5TracksCloudCut(80,100,200,nTrackInVtxFit);
+            arOneWindHandler[i]->AddAcceptRapidityCut(0.95);
+        if (i==2)
+            arOneWindHandler[i]->AddAcceptRapidityCut(0.99);
+
+//        arOneWindHandler[i]->AddS5TracksCloudCut(80,100,200,nTrackInVtxFit);
 //		    arOneWindHandler[i]->AddPSDEnergyCut(1470, e28Central);
 
 
@@ -149,7 +153,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
-    const int N1=3;//1;
+    const int N1=0;//1;
 	PtNFluctuationHandler* arHandlerFlucPtNRaw[N1];
     for (int i =0; i<N1; i++){
         TString name;

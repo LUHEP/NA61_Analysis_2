@@ -39,6 +39,7 @@
 #include <TF1.h>
 #include <TLegend.h>
 #include <THnSparse.h>
+#include <TRandom.h>
 
 #endif
 
@@ -823,6 +824,7 @@ private:
     TCutG* myTriangleZone;
     double myMultCoord[3];
     double myPSD28Coord[3];
+    static TRandom myRand;
 };
 
 
