@@ -136,13 +136,14 @@ OneWindHandler::~OneWindHandler()
 	ImpParHist->Write();
 	WFAHist->Write();
     WFAT4Hist->Write();
-	fitVtxHist->Write();
 
     dEdxPHist0->Write();
 	dEdxPHist1->Write(); //Ya pomenyal
     fitVtxNHist->Write(); //Ya pomenyal
 
     psdEnergyNHist->Write();
+    psdEnergyTracksInFitHist->Write();
+    psdEnergyAllTracksHist->Write();
 	psdEnergyS5Hist->Write();
 	multS5Hist->Write();
     S1S2Hist->Write();
@@ -186,7 +187,6 @@ OneWindHandler::~OneWindHandler()
         Pr5->Write();
     }
     VtxTracksVsAllTracksHist->Write();
-    BadGoodRationHist->Write();
 
     BPD3XSignalNVtxTracks ->Write();
     BPD3YSignalNVtxTracks->Write();
@@ -217,7 +217,27 @@ void OneWindHandler::Init()
 	if (bSim == true) string1 = "Sim";
 		else string1 = "Rec";
 	if (bRaw==true) string1 = "Raw";
-	TString name = myEventCutList->GetName() + myTrackCutList->GetName()+ string1 ;
+
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
+	TString name = myEventCutList->GetName() + myTrackCutList->GetName()+energyName+ systemTypeName + string1 ;
 	myNameHist = name;
 
 	double n = 0;
@@ -239,10 +259,10 @@ void OneWindHandler::Init()
 		break;
 	}
 	double maxPSDEnergy = beamMomentum * n * 2;
-	psdEnergyHist = new TH1D("PSDHist_" + name, "PSD energy distribution" + name + ";PSD(28);entries", 1000, 0, maxPSDEnergy);
-    psdEnergyHist16 = new TH1D("PSDHist16_" + name, "PSD energy distribution" + name + ";PSD(16);entries", 1000, 0, maxPSDEnergy);
-    //acceptHist		= new TH3D("acceptance_"+name, "acceptance_"+name+ "; phi;Pt;eta;entries",31,-3.5,3.5,31,0,1.5, 61,0,10);
-
+    psdEnergyHist = new TH1D("PSDHist_" + name, "PSD energy distribution" + name + ";PSD(28);entries", 1000, 0,
+                                 maxPSDEnergy);
+    psdEnergyHist16 = new TH1D("PSDHist16_" + name, "PSD energy distribution" + name + ";PSD(16);entries", 1000, 0,
+                                   maxPSDEnergy);
 	chargeHist	= new TH1D("chargeHist_"+name,"chargeHist_"+name+";charge;entries",	5,		-2.5,	2.5);
 	multHist	= new TH1D("multHist_"+name,"multHist_"+name+	";nTracks;entries",		301,	-0.5,	300.5);
 
@@ -269,14 +289,17 @@ void OneWindHandler::Init()
 	WFAHist 	= new TH1D("WFA_"+ name,"WFA_"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
     WFAT4Hist   = new TH1D("WFA_T4_"+ name, "WFA_T4"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
     MHTDCHist   = new TH1D("MHTDC_"+ name, "MHTDC"+ name+ ";time [ns]; entries",			1001,	-30000,	30000);
-	fitVtxHist  = new TH1D("Fitted_Vtx_Position_"+name, "fitVtx_"+name+";z [cm]; entries", 7001,-700,0);
 
 	dEdxPHist0 = new TH2D("dEdxP0_cloud_" + name, "dEdxP0_cloud_" + name + "; log10(p[GeV/c]); dE/dx (negative); entries", 601, -3, 3, 301, -0.05, 3.95); //Ya pomenyal (nado esche pomenyat', chtoby klalsya srazu log(p) v hist
 	dEdxPHist1   = new TH2D("dEdxP1_cloud_"+name,"dEdxP1_cloud_"+name+ 		"; log10(p[GeV/c]); dE/dx (positive); entries", 601, -3, 3, 301, -0.05, 3.95); //Ya pomenyal (nado esche pomenyat', chtoby klalsya srazu log(p) v hist
     fitVtxNHist   = new TH2D("fitVtxN_cloud_"+name,"fitVtxN_cloud_"+name+ 		"; z [cm]; N; entries", 7001, -700, 0, 31,	-0.5,	300.5); //Ya pomenyal
 
-	psdEnergyNHist = new TH2D("psdEnergyN_cloud_" + name, "psdEnergyN_cloud_" + name + "; PSD(28) [GeV]; N; entries", 1000, 0, maxPSDEnergy, 301, -0.5, 300.5); //Ya pomenyal
-	psdEnergyS5Hist = new TH2D("psdEnergyS5_cloud_" + name, "psdEnergyS5_cloud_" + name + "; PSD(28) [GeV]; S5; entries", 1000, 0, maxPSDEnergy, 101, -0.5, 500.5);
+	psdEnergyNHist = new TH2D("psdEnergyN_cloud_" + name, "psdEnergyN_cloud_" + name + "; PSD(28) [GeV]; N; entries", 250, 0, maxPSDEnergy, 101, -1.5, 301.5); //Ya pomenyal
+    psdEnergyTracksInFitHist = new TH2D("psdEnergyNTracksInFit_cloud_" + name, "psdEnergyNTracksInFit_cloud_" + name + "; PSD(28) [GeV]; NTracksInFit; entries", 250, 0, maxPSDEnergy, 101, -1.5, 301.5); //Ya pomenyal
+    psdEnergyAllTracksHist = new TH2D("psdEnergyAllTracks_cloud_" + name, "psdEnergyAllTracks_cloud_" + name + "; PSD(28) [GeV]; All tracks; entries", 250, 0, maxPSDEnergy, 101, -1.5, 301.5); //Ya pomenyal
+
+
+    psdEnergyS5Hist = new TH2D("psdEnergyS5_cloud_" + name, "psdEnergyS5_cloud_" + name + "; PSD(28) [GeV]; S5; entries", 1000, 0, maxPSDEnergy, 101, -0.5, 500.5);
 	multS5Hist = new TH2D("S5N_cloud_" + name, "S5N_cloud_" + name + "; S5; N; entries", 101, -0.5, 500.5, 301, -0.5, 300.5);
 
     S1S2Hist = new TH2D("S1S2_cloud_" + name, "S1S2_cloud_" + name + "; S1; S2; entries", 101, -0.5, 1000.5, 101, -0.5, 1000.5);
@@ -369,8 +392,6 @@ void OneWindHandler::Init()
 
 
 	VtxTracksVsAllTracksHist = new TH2D("VtxTrVsAllTrack"+name,"VtxTrVsAllTrack" + name + "vtxTracks; GoodVtxTracks; AllTracks",301,	-0.5,	300.5, 601,	-0.5,	600.5);
-
-    BadGoodRationHist = new TH1D("BadGoodRation"+name,"BadGoodRation" + name + "vtxTracks;  VtxTracks/AllTracks",100,	0,	1);
 
     BPD3XSignalNVtxTracks = new TH2D("BPD3XSignalNVtxTracks_"+name, "BPD3XSignalNVtxTracks" + name+"; BPD3XSignal; NTracksUsedForFitMainVtx",
                                      300, 0, 15000, 300, -0.5, 300);
@@ -606,7 +627,6 @@ void OneWindHandler::EndOfEvent(Event& ev)
 
 
 	bEventInfoFull = false;
-	fitVtxHist	->Fill(myEventInfo.myFitVtxZ);
 	fitVtxNHist->Fill(myEventInfo.myFitVtxZ, N); //Ya pomenyal
 	BPD1Hist	->Fill(myEventInfo.myBPD[0],myEventInfo.myBPD[1]);
 	BPD2Hist	->Fill(myEventInfo.myBPD[2],myEventInfo.myBPD[3]);
@@ -645,6 +665,7 @@ void OneWindHandler::EndOfEvent(Event& ev)
     }
 
 	psdEnergyNHist->Fill(myEventInfo.myEnergyPSD, N);
+    //psdEnergyTracksInFitHist->Fill(myEventInfo.myEnergyPSD, N);
 	psdEnergyS5Hist->Fill(myEventInfo.myEnergyPSD, myEventInfo.myS5ADC);
 	multS5Hist->Fill(myEventInfo.myS5ADC, N);
     S1S2Hist->Fill(myEventInfo.myS1ADC,myEventInfo.myS2ADC);
@@ -673,12 +694,10 @@ void OneWindHandler::EndOfEvent(Event& ev)
         nTracks++;
     }
     N =  recEvent.GetMainVertex().GetNumberOfTracksInFit();
-
-
+    psdEnergyAllTracksHist->Fill(myEventInfo.myEnergyPSD,nTracks);
+    psdEnergyTracksInFitHist->Fill(myEventInfo.myEnergyPSD, N);
 
     VtxTracksVsAllTracksHist -> Fill(N,nTracks/*-N*/);
-    if (N<(beamMomentum/3))
-        BadGoodRationHist->Fill(N/nTracks);
 
     BPD3XSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalX,N);
     BPD3YSignalNVtxTracks->Fill(myEventInfo.myBPD3SignalY,N);
@@ -732,8 +751,27 @@ void LRCHandler::Init()
     shalala     = 0;
 
 	// --- hists
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
 	TString name = myEventCutList->GetName() + myTrackCutList->GetName() + "_Back_" +
-		myBackwardTrackCutList->GetName() + "_For_" + myForwardTrackCutList->GetName();
+		myBackwardTrackCutList->GetName() + "_For_" + myForwardTrackCutList->GetName() + energyName + systemTypeName;
 
 	if (bSim==true) name = name + "_Sim";
 	else {
@@ -743,6 +781,7 @@ void LRCHandler::Init()
 			name = name + "_Raw";
 	}
 	myNameHist = name;
+
 	NetChHist	= new TH2D("NetCh_correlation_cloud_all"+myNameHist,myNameHist+			"; Qf; Qb; entries",
 		21,-10.5,10.5,	21,-10.5,10.5);
 	TestPtPtHist = new TH2D("TEST_ALL_PTPT"+name, "TEST_ALL_PTPT_"+name+ ";pt_f_all;pt_b_all; entries",
@@ -1180,6 +1219,7 @@ void BaseHandler::Remove0EPSDEvents(ePSDModulCombinations ePSDMod)
 	Cut* A = new RunWith0EnergyInOneModuleCutVer2(bRaw, ePSDMod);
 	myEventCutList->AddCut(A);
 }
+
 void BaseHandler::RemoveBadRuns()
 {
     Cut* A = new BadRunCut(bRaw);
@@ -1196,27 +1236,18 @@ void BaseHandler::AddZVtxCut(double_t minZ, double_t maxZ)
     }
 }
 
-void BaseHandler::AddCentrality(double_t minPer, double_t maxPer)
+void BaseHandler::AddCentrality(int minPer, int maxPer)
 {
-    if (minPer>1 || minPer<0) {
-		cout<<"Error. Can't add centrality cut with minPer < 0 or >1"<<endl;
-		return;
-	}
-    if (maxPer>1 || maxPer<0) {
-		cout<<"Error. Can't add centrality cut with maxPer < 0 or >1"<<endl;
-		return;
-	}
-
 	if (minPer>=maxPer){
         cout<<"Error. Can't add centrality cut with minPer >= maxPer"<<endl;
 		return;
 	}
 
 	if (this->IsItRaw()){
-		Cut* A = new CentralityCut(minPer,maxPer,1);
+		Cut* A = new CentralityCut(minPer,maxPer,bRaw);
 		myEventCutList->AddCut(A);
 	}else{
-		Cut* A = new CentralityCut(minPer,maxPer,0);
+		Cut* A = new CentralityCut(minPer,maxPer,bRaw);
 		myEventCutList->AddCut(A);
 	}
 }
@@ -1309,16 +1340,16 @@ void BaseHandler::AddPCut(double_t minP, double_t maxP)
     }
 }
 
-void BaseHandler::AddAcceptCut()
+void BaseHandler::AddAcceptRapidityCut(double minEfficiency)
 {
-    Cut* A = new AcceptCut();
-    myTrackCutList->AddCut(A);
+	Cut* A = new AcceptRapidityCut(NA61,minEfficiency);
+	myTrackCutList->AddCut(A);
 }
 
-void BaseHandler::AddAcceptRapidityCut()
+void BaseHandler::AddAcceptRapidityCut(eAcceptanceType acType, double minEfficiency)
 {
-	Cut* A = new AcceptRapidityCut();
-	myTrackCutList->AddCut(A);
+    Cut* A = new AcceptRapidityCut(acType,minEfficiency);
+    myTrackCutList->AddCut(A);
 }
 
 void BaseHandler::AddEECut()
@@ -1330,10 +1361,21 @@ void BaseHandler::AddEECut()
 
 void BaseHandler::AddEtaCut(double_t minEta, double_t maxEta)
 {
-	if (minEta>maxEta)
-		cout<<nameOutFile<<": Error. minEta>maxEta"<<endl;
+	if (minEta>maxEta) {
+        cout << nameOutFile << ": Error. minEta>maxEta" << endl;
+        return;
+    }
 	Cut* A = new EtaCut(minEta, maxEta);
 	myTrackCutList->AddCut(A);
+}
+
+void BaseHandler::AddRapidityCut(double_t min, double_t max)
+{
+    if (min>max) {
+        cout << nameOutFile << ": Error. minEta>maxEta" << endl;
+    }
+    Cut* A = new RapidityCut(min, max);
+    myTrackCutList->AddCut(A);
 }
 
 void BaseHandler::AddPhiCut(double_t minPhi, double_t maxPhi)
@@ -1532,6 +1574,25 @@ void BaseHandler::AddBPD3RMS()
     myEventCutList->AddCut(A);
 }
 
+void BaseHandler::Remove0BinsEvents()
+{
+    Cut* A  = new BadEventsBadRunsPSDCut();
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddFPGACut(ePSDModulCombinations comb)
+{
+    Cut* A = new FPGACut(comb, bRaw);
+    myEventCutList->AddCut(A);
+}
+
+void BaseHandler::AddS5TracksCloudCut(double S5, double maxN, double maxPSD28, eMultiplicityType multType)
+{
+    Cut* A = new S5CloudCut(S5,maxN,maxPSD28, multType, bRaw);
+    myEventCutList->AddCut(A);
+}
+
+
 void StatEventInfo::Reset()
 {
 	if (myReset == false){
@@ -1612,8 +1673,14 @@ void StatEventInfo::DissectEvent(Event &event)
 
 
         PSD& psd = pRecEvent->GetPSD();
-		for (int i=0; i<nPSDMods; i++)
-			myEnergyPSD = myEnergyPSD + psd.GetModule(i+1).GetEnergy();
+		for (int i=0; i<nPSDMods; i++) {
+            if (i>28) break;
+//            if (i==17 || i == 18 || i == 19 || i == 20)
+ //               continue;
+   //         if (i == 23 || i == 24 || i ==25 || i == 26)
+     //           continue;
+            myEnergyPSD = myEnergyPSD + psd.GetModule(i + 1).GetEnergy();
+        }
 
         for (int i =0; i<44; i++)
             myEnergyPSD44 = myEnergyPSD44 + psd.GetModule(i+1).GetEnergy();
@@ -1705,7 +1772,24 @@ void PtNFluctuationHandler::Init()
 			
 
 	// --- hists
-	TString name = myEventCutList->GetName() + myTrackCutList->GetName();
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+	TString name = myEventCutList->GetName() + myTrackCutList->GetName()+energyName + systemTypeName;
 
 	if (bSim == true) name = name + "_Sim";
 	else {
@@ -1735,7 +1819,26 @@ void PSDFluctuationHandler::Init()
 
 
 	// --- hists
-	TString name = myEventCutList->GetName() + myTrackCutList->GetName();
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
+	TString name = myEventCutList->GetName() + myTrackCutList->GetName() + energyName + systemTypeName;
 
 	if (bSim == true) name = name + "_Sim";
 	else {
@@ -2280,7 +2383,26 @@ void TimeHandler::Init() {
 	if (bSim == true) string1 = "Sim";
 	else string1 = "Rec";
 	if (bRaw == true) string1 = "Raw";
-	TString name = "Time_" + myEventCutList->GetName() + myTrackCutList->GetName() + string1;
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
+	TString name = "Time_" + myEventCutList->GetName() + myTrackCutList->GetName() + energyName + systemTypeName+ string1;
 	myNameHist = name;
 
 	psdEnergyHist = new TH2D("PSDHist_" + name, "PSD energy distribution" + name + ";runNumber;PSD(28);entries",
@@ -2416,7 +2538,26 @@ void PSDHandler::Init()
     if (bSim == true) string1 = "Sim";
     else string1 = "Rec";
     if (bRaw == true) string1 = "Raw";
-    TString name = "PSDModules_" + myEventCutList->GetName()+ myTrackCutList->GetName() + string1;
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
+    TString name = "PSDModules_" + myEventCutList->GetName()+ myTrackCutList->GetName() + energyName +systemTypeName+ string1;
     myNameHist = name;
 
     const double* arXMax;
@@ -2462,18 +2603,159 @@ void PSDHandler::PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
 void PSDHandler::EndOfEvent(Event & ev) {
     if (init == false) { this->Init(); }
     double arVal[nBinsPSDModules] = {0};
+    RecEvent *pRecEvent = &ev.GetRecEvent();
     if (bT1) {
         arVal[0] = ev.GetRecEvent().GetNumberOf<rec::Track>();
     }
     else
-        arVal[0] = nTracks0 + nTracks1;
-    RecEvent *pRecEvent = &ev.GetRecEvent();
+   //     arVal[0] = nTracks0 + nTracks1; //FIXME
+        arVal[0] = pRecEvent->GetMainVertex().GetNumberOfTracksInFit();
     PSD &psd = pRecEvent->GetPSD();
-    for (int i = 1; i < nBinsPSDModules; i++)
+    for (int i = 1; i < 45; i++)
         arVal[i] = psd.GetModule(i).GetEnergy();
-
+    arVal[45] =  ev.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
 
     myModuleSparse->Fill(arVal);
     nTracks0 = 0;
     nTracks1 = 0;
+}
+
+PSD0BinsFindHandler::PSD0BinsFindHandler(const char* nameOut) :BaseHandler(nameOut)
+{}
+
+PSD0BinsFindHandler::PSD0BinsFindHandler(const char* nameOut, bool simE) : BaseHandler(nameOut, simE)
+{}
+
+PSD0BinsFindHandler::~PSD0BinsFindHandler()
+{
+    cout << "name outFile = " << nameOutFile << endl;
+    TFile outputFile(nameOutFile, "RECREATE");
+    outputFile.cd();
+
+    //	cout<<"writing..."<<endl;
+
+    TH1F* eventStat = myEventCutList->GetStatHist(nameOutFile + myNameHist, bSim);
+    eventStat->Write();
+    myEnergyInModulesWithNon0Status->Write();
+    myEnergyInModulesWith0Status->Write();
+    for (int i=0; i<nPSDModules; i++)
+        iRunsIEventsHists[i]->Write();
+
+    outputFile.Close();
+}
+
+void PSD0BinsFindHandler::Init() {
+    cout << "init" << endl;
+    double minBound, maxBound, nBinsRunNumber;
+    switch (systemType) {
+        case ArSc:
+            if (beamMomentum == 13) {
+                minBound = minRunNumberArSc13 - 0.5;
+                maxBound = maxRunNumberArSc13 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+            if (beamMomentum == 19) {
+                minBound = minRunNumberArSc19 - 0.5;
+                maxBound = maxRunNumberArSc19 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+            if (beamMomentum == 30) {
+                minBound = minRunNumberArSc30 - 0.5;
+                maxBound = maxRunNumberArSc30 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+            if (beamMomentum == 150) {
+                minBound = minRunNumberArSc150 - 0.5;
+                maxBound = maxRunNumberArSc150 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+            if (beamMomentum == 40) {
+                minBound = minRunNumberArSc40 - 0.5;
+                maxBound = maxRunNumberArSc40 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+
+            if (beamMomentum == 75){
+                minBound = minRunNumberArSc75 - 0.5;
+                maxBound = maxRunNumberArSc75 + 0.5;
+                nBinsRunNumber = maxBound - minBound;
+                break;
+            }
+
+        default:
+            minBound = -0.5;
+            maxBound = 50000.5;
+            nBinsRunNumber = maxBound - minBound;
+            break;
+    }
+    init = true;
+
+    TString string1;
+    if (bSim == true) string1 = "Sim";
+    else string1 = "Rec";
+    if (bRaw == true) string1 = "Raw";
+    char energyName[50];
+    sprintf(energyName,"_BeamMomentum_%d",beamMomentum);
+
+    TString systemTypeName;
+    switch (systemType){
+        case pp:
+            systemTypeName = "_pp";
+            break;
+        case BeBe:
+            systemTypeName = "_BeBe";
+            break;
+        case ArSc:
+            systemTypeName = "_ArSc";
+            break;
+        default:
+            systemTypeName = "_unknownSystemType";
+            break;
+    }
+
+    TString name = "Time_" + myEventCutList->GetName()  + energyName+ systemTypeName + string1;
+    myNameHist = name;
+
+    for (int i=0;i<nPSDModules;i++)
+    {
+        TString name3;
+        char name2[50];
+        sprintf(name2,"_%i",i+1);
+        name3 = name2;
+
+        iRunsIEventsHists[i]= new TH2D("PSDHist_"+ name3 + name, "PSD 0bins module " + name3 + name + ";runNumber;eventNumber;entries",
+                                      nBinsRunNumber, minBound, maxBound, 700, 0, 140000);
+
+    }
+    myEnergyInModulesWith0Status = new TH1D("0Status","0Status; energy; entries", 1001,-0.5, 1000.5);
+    myEnergyInModulesWithNon0Status = new TH1D("Non0Status","Non0Status; energy; entries", 1001,-0.5, 1000.5);
+
+}
+void PSD0BinsFindHandler::EndOfEvent(Event& ev)
+{
+    if (init == false)
+        this->Init();
+    double E;
+    RecEvent *pRecEvent = &ev.GetRecEvent();
+    PSD &psd = pRecEvent->GetPSD();
+    cout<<endl;
+    cout<<ev.GetEventHeader().GetRunNumber()<<endl;
+    cout<<ev.GetEventHeader().GetId()<<endl<<endl;
+    int status;
+    for (int i = 0; i < nPSDModules; i++) {
+        E = psd.GetModule(i+1).GetEnergy();
+        status = psd.GetModule(i+1).GetStatus();
+        if (E==0){
+            iRunsIEventsHists[i]->Fill(ev.GetEventHeader().GetRunNumber(),ev.GetEventHeader().GetId());
+        }
+        if (status == 0)
+            myEnergyInModulesWith0Status->Fill(E);
+        else
+            myEnergyInModulesWithNon0Status->Fill(E);
+    }
 }

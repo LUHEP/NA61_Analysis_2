@@ -556,46 +556,364 @@ TString ZVertexCut::GetShortNameWithPar()
 	return name;
 }
 
-CentralityCut::CentralityCut(double minPer, double maxPer, bool bRaw):
+CentralityCut::CentralityCut(int minPer, int maxPer, bool bRaw):
 	myLowPer(minPer),
 	myUpPer(maxPer)
 {
+    cout<<"Centrality cut real data"<<endl;
 	my_Name = "Centrality";
-	my_Short_Name = "PSD";
+	my_Short_Name = "Centrality";
 	myMaxEPSD=0;
 	myMinEPSD=0;
+    bAllIsOk = true;
+    if (minPer>maxPer) {
+        bAllIsOk = false;
+        cout << "ERROR: min % cntrality > max % centrality!!!";
+    }
+
 	double per;
 	double E = 0;
 	if (bRaw==true){
-		//cout << "centrality_raw" << endl;
-		ifstream in(configPath+"/psdByEmil/150BeBeCentrality28Mod.txt");
-		while(in>>per){
-			if(per>myLowPer){
-				myMinEPSD = E;
-				in>>E;
-				break;
-			}
-			in>>E;
-		}
-		while(in>>per){
-			if(per>myUpPer){
-				myMaxEPSD = E;
-				in>>E;
-				break;
-			}
-			in>>E;
-		}
-		if(myMaxEPSD == 0){
-			cout<<"WARNING: max percentile can't be so large (problem with simulation of T2 trigger)"<<endl;
-			cout<<"it has reduced to the largest value: "<<per<<endl;
-			myMaxEPSD=E;
-		}
-		in.close();
-		cout<<myLowPer*100<<"% "<<myMinEPSD<<endl;
-		cout<<myUpPer*100<<"% "<<myMaxEPSD<<endl;
+        switch (systemType) {
+            case pp:
+                cout << "ERROR: Centrality is not working for pp systems!!!";
+                bAllIsOk=false;
+                break;
+            case BeBe:
+                if (beamMomentum == 150) {
+                    myPSDModuleSet = e28Central;
+                    for (int i = 1; i < 29; i++)
+                        myPSDModArray[i] = 1;
+                    ifstream in(configPath + "/psdByEmil/150BeBeCentrality28Mod.txt");
+                    while (in >> per) {
+                        if (per > myLowPer) {
+                            myMinEPSD = E;
+                            in >> E;
+                            break;
+                        }
+                        in >> E;
+                    }
+                    while (in >> per) {
+                        if (per > myUpPer) {
+                            myMaxEPSD = E;
+                            in >> E;
+                            break;
+                        }
+                        in >> E;
+                    }
+                    if (myMaxEPSD == 0) {
+                        cout << "WARNING: max percentile can't be so large (problem with simulation of T2 trigger)" << endl;
+                        cout << "it has reduced to the largest value: " << per << endl;
+                        myMaxEPSD = E;
+                    }
+                    in.close();
+                    cout << myLowPer * 100 << "% " << myMinEPSD << endl;
+                    cout << myUpPer * 100 << "% " << myMaxEPSD << endl;
+                } else {
+                    cout << "ERROR: Centrality is not working for such systems!";
+                    bAllIsOk = false;
+                }
+            case ArSc:
+
+                switch (beamMomentum){
+                    case 150:
+                        myPSDModuleSet = e16Central;
+                        for (int i = 1; i < 17; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 1344;
+                                break;
+                            case 5:
+                                myMinEPSD = 1728;
+                                break;
+                            case 10:
+                                myMinEPSD = 2016;
+                                break;
+                            case 15:
+                                myMinEPSD = 2256;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 1344;
+                                break;
+                            case 5:
+                                myMaxEPSD = 1728;
+                                break;
+                            case 10:
+                                myMaxEPSD = 2016;
+                                break;
+                            case 15:
+                                myMaxEPSD = 2256;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+
+
+
+                        break;
+                    case 75:
+                        myPSDModuleSet = e28Central;
+                        for (int i = 1; i < 29; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 810;
+                                break;
+                            case 5:
+                                myMinEPSD = 1080;
+                                break;
+                            case 10:
+                                myMinEPSD = 1290;
+                                break;
+                            case 15:
+                                myMinEPSD = 1470;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 810;
+                                break;
+                            case 5:
+                                myMaxEPSD = 1080;
+                                break;
+                            case 10:
+                                myMaxEPSD = 1290;
+                                break;
+                            case 15:
+                                myMaxEPSD = 1470;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+
+                        break;
+                    case 40:
+                        myPSDModuleSet = e28Central;
+                        for (int i = 1; i < 29; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 400;
+                                break;
+                            case 5:
+                                myMinEPSD = 547;
+                                break;
+                            case 10:
+                                myMinEPSD = 666;
+                                break;
+                            case 15:
+                                myMinEPSD = 762;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 400;
+                                break;
+                            case 5:
+                                myMaxEPSD = 547;
+                                break;
+                            case 10:
+                                myMaxEPSD = 666;
+                                break;
+                            case 15:
+                                myMaxEPSD = 762;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        break;
+                    case 30:
+                        myPSDModuleSet = e28Central;
+                        for (int i = 1; i < 29; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 238;
+                                break;
+                            case 5:
+                                myMinEPSD = 350;
+                                break;
+                            case 10:
+                                myMinEPSD = 446;
+                                break;
+                            case 15:
+                                myMinEPSD = 528;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 238;
+                                break;
+                            case 5:
+                                myMaxEPSD = 350;
+                                break;
+                            case 10:
+                                myMaxEPSD = 446;
+                                break;
+                            case 15:
+                                myMaxEPSD = 528;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        break;
+                    case 19:
+                        myPSDModuleSet = e28Central;
+                        for (int i = 1; i < 45; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 138;
+                                break;
+                            case 5:
+                                myMinEPSD = 207;
+                                break;
+                            case 10:
+                                myMinEPSD = 263;
+                                break;
+                            case 15:
+                                myMinEPSD = 315;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 138;
+                                break;
+                            case 5:
+                                myMaxEPSD = 207;
+                                break;
+                            case 10:
+                                myMaxEPSD = 263;
+                                break;
+                            case 15:
+                                myMaxEPSD = 315;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        break;
+                    case 13:
+                        myPSDModuleSet = e28Central;
+                        for (int i = 1; i < 45; i++)
+                            myPSDModArray[i] = 1;
+
+                        switch (myLowPer){
+                            case 0:
+                                myMinEPSD = 0;
+                                break;
+                            case 1:
+                                myMinEPSD = 61;
+                                break;
+                            case 5:
+                                myMinEPSD = 104;
+                                break;
+                            case 10:
+                                myMinEPSD = 142;
+                                break;
+                            case 15:
+                                myMinEPSD = 178;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        switch (myUpPer){
+                            case 0:
+                                myMaxEPSD = 0;
+                                break;
+                            case 1:
+                                myMaxEPSD = 61;
+                                break;
+                            case 5:
+                                myMaxEPSD = 104;
+                                break;
+                            case 10:
+                                myMaxEPSD = 142;
+                                break;
+                            case 15:
+                                myMaxEPSD = 178;
+                                break;
+                            default:
+                                bAllIsOk==false;
+                                cout<<"ERROR: no such percentile in the centrality list!"<<endl;
+                        }
+                        break;
+                    default:
+                        cout << "ERROR centrality: no such momentum in the centrality list";
+                        bAllIsOk = false;
+                }
+                break;
+            default:
+                cout << "ERROR: Centrality is not working for such systems!";
+                bAllIsOk = false;
+                break;
+        }
 	}else{
-		//cout << "Centrality_sim" << endl;
-		this->InitLegacyCentrality();//FIXME bad realization!
+        cout<<"Centrality cut simulation"<<endl;
+        if (systemType == BeBe)
+		    this->InitLegacyCentrality();//FIXME bad realization!
+        else {
+            cout << "ERROR: Centrality is not working for such systems!";
+            bAllIsOk=false;
+        }
 	}
 }
 
@@ -612,15 +930,17 @@ void CentralityCut::InitLegacyCentrality()
 CentralConfig& cc = CentralConfig::GetInstance(str_configPath + "/bootstrap.xml");
 bool CentralityCut::CheckEvent(Event& event, bool bSim)
 {
-//	cout<<"Centr"<<endl;
+    if (bAllIsOk == false) return false;
 	if (bInit==false){ //RAW data
-		double_t eventPSDEnergy = 0;
+        double_t eventPSDEnergy = 0;
 		if (bSim == false)
 		{//DON'T FORGET TO CHANGE the Handler
-			RecEvent* pRecEvent=&event.GetRecEvent();
+            RecEvent* pRecEvent=&event.GetRecEvent();
 			PSD& psd = pRecEvent->GetPSD();
-			for (int i=0; i<nPSDMods; i++)
-				eventPSDEnergy = eventPSDEnergy + psd.GetModule(i+1).GetEnergy();
+			for (int i=0; i<44; i++) {
+                if (myPSDModArray[i + 1]==true)
+                    eventPSDEnergy = eventPSDEnergy + psd.GetModule(i + 1).GetEnergy();
+            }
 		} else{
 //			SimEvent* pSimEvent=&event.GetSimEvent();
 //			PSD& psd = pSimEvent->GetPSD();
@@ -629,7 +949,9 @@ bool CentralityCut::CheckEvent(Event& event, bool bSim)
 			myNEntries++;
 			return 1;
 		}
-		if ((eventPSDEnergy > myMinEPSD)&&(eventPSDEnergy < myMaxEPSD)) {
+        cout<<eventPSDEnergy<<endl;
+        cout<<myMinEPSD<<"  "<<eventPSDEnergy<<"  "<<myMaxEPSD<<endl;
+        if ((eventPSDEnergy > myMinEPSD)&&(eventPSDEnergy < myMaxEPSD)) {
 			myNEntries++;
 			return 1;
 		}
@@ -655,7 +977,7 @@ TString CentralityCut::GetShortNameWithPar()
 {
 	TString name;
 	char name2[50];
-    sprintf(name2,"_%f_%f",myLowPer,myUpPer);
+    sprintf(name2,"_%i_%i",myLowPer,myUpPer);
 	name = my_Short_Name + name2;
 	return name;
 }
@@ -954,120 +1276,6 @@ TString PtCut::GetShortNameWithPar()
 	return name;
 }
 
-AcceptCut::AcceptCut():
-myConfigPath(configPath)
-{
-    TFile* in_file = TFile::Open(string(myConfigPath + "/acceptance.root").c_str());
-    //TH3D* acceptHist = (TH3D*)in_file->GetObjectChecked("newAcc", "TH3D");
-	TH3D* acceptHist = (TH3D*)in_file->GetObjectChecked("recAcceptance", "TH3D");
-    itsAcceptHist = (TH3D*) acceptHist->Clone("myAccCopy");
-
-	myXAxLowEdge = itsAcceptHist->GetXaxis()->GetBinLowEdge(1);
-	myYAxLowEdge = itsAcceptHist->GetYaxis()->GetBinLowEdge(1);
-	myZAxLowEdge = itsAcceptHist->GetZaxis()->GetBinLowEdge(1);
-
-	myXAxBinWidth = itsAcceptHist->GetXaxis()->GetBinWidth(1);
-	myYAxBinWidth = itsAcceptHist->GetYaxis()->GetBinWidth(1);
-	myZAxBinWidth = itsAcceptHist->GetZaxis()->GetBinWidth(1);
-
-	myNXBins = itsAcceptHist->GetXaxis()->GetNbins() + 1;
-	myNYBins = itsAcceptHist->GetYaxis()->GetNbins() + 1;
-	myNZBins = itsAcceptHist->GetZaxis()->GetNbins() + 1;
-
-	my_Name = "Acceptance_map";
-	my_Short_Name = "Ac";
-}
-
-AcceptCut::AcceptCut(TString yourConfigPath):
-myConfigPath(yourConfigPath)
-{
-	TFile* in_file = TFile::Open(string(myConfigPath + "/acceptance.root").c_str());
-	//TH3D* acceptHist = (TH3D*)in_file->GetObjectChecked("newAcc", "TH3D");
-	TH3D* acceptHist = (TH3D*)in_file->GetObjectChecked("recAcceptance", "TH3D");
-	
-   itsAcceptHist = (TH3D*) acceptHist->Clone("myAccCopy");
-
-   myXAxLowEdge = itsAcceptHist->GetXaxis()->GetBinLowEdge(1);
-   myYAxLowEdge = itsAcceptHist->GetYaxis()->GetBinLowEdge(1);
-   myZAxLowEdge = itsAcceptHist->GetZaxis()->GetBinLowEdge(1);
-
-   myXAxBinWidth = itsAcceptHist->GetXaxis()->GetBinWidth(1);
-   myYAxBinWidth = itsAcceptHist->GetYaxis()->GetBinWidth(1);
-   myZAxBinWidth = itsAcceptHist->GetZaxis()->GetBinWidth(1);
-
-   myNXBins = itsAcceptHist->GetXaxis()->GetNbins() + 1;
-   myNYBins = itsAcceptHist->GetYaxis()->GetNbins() + 1;
-   myNZBins = itsAcceptHist->GetZaxis()->GetNbins() + 1;
-
-	my_Name = "Acceptance_map";
-	my_Short_Name = "Ac";
-}
-
-AcceptCut::~AcceptCut()
-{
-   delete itsAcceptHist;
-}
-
-bool AcceptCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
-{
-//	cout<<"Accept"<<endl;
-	double_t Px, Py, Pz, P, Pt, eta, phi;
-	Vector vtxMomentum = vtxTrack.GetMomentum();
-	Px=vtxMomentum.GetX();
-	Py=vtxMomentum.GetY();
-    Pz=vtxMomentum.GetZ();
-	P=vtxMomentum.GetMag();
-    phi	=	TMath::ATan2(Py,Px);
-    Pt=sqrt(Px*Px+Py*Py);
-    eta=-0.5*TMath::Log((P-Pz)/(P+Pz));
-    double_t a,b,c;
-	a = 1 + floor((phi - myXAxLowEdge) / myXAxBinWidth);
-	b = 1 + floor((Pt - myYAxLowEdge) / myYAxBinWidth);
-	c = 1 + floor((eta - myZAxLowEdge) / myZAxBinWidth);
-
-	if (a < 1 || b < 1 || c < 1) return 0;
-    if ((a<myNXBins) && (b<myNYBins) && (c<myNZBins)) {
-        double_t N_acc;
-        N_acc=itsAcceptHist->GetBinContent(a,b,c);
-        if (N_acc==0)
-            return 0;
-        else {
-            myNEntries++;
-            return 1;
-        }
-    } else 
-		return 0;
-}
-
-bool AcceptCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
-{
-//	cout<<"Accept"<<endl;
-	double_t Px, Py, Pz, P, Pt, eta, phi;
-	Vector vtxMomentum = vtxTrack.GetMomentum();
-	Px=vtxMomentum.GetX();
-	Py=vtxMomentum.GetY();
-    Pz=vtxMomentum.GetZ();
-	P=vtxMomentum.GetMag();
-    phi	=	TMath::ATan2(Py,Px);
-    Pt=sqrt(Px*Px+Py*Py);
-    eta=-0.5*TMath::Log((P-Pz)/(P+Pz));
-    double_t a,b,c;
-	a = 1 + floor((phi - myXAxLowEdge) / myXAxBinWidth);
-	b = 1 + floor((Pt - myYAxLowEdge) / myYAxBinWidth);
-	c = 1 + floor((eta - myZAxLowEdge) / myZAxBinWidth);
-	if (a < 1 || b < 1 || c < 1) return 0;
-	if ((a<myNXBins) && (b<myNYBins) && (c<myNZBins)){
-        double_t N_acc;
-        N_acc=itsAcceptHist->GetBinContent(a,b,c);
-        if (N_acc==0)
-            return 0;
-        else {
-            myNEntries++;
-            return 1;
-        }
-    } else 
-		return 0;
-}
 
 
 
@@ -1120,7 +1328,43 @@ TString EtaCut::GetShortNameWithPar()
 	return name;
 }
 
+RapidityCut::RapidityCut(double min, double max):
+        myMaxRapidity(max),
+        myMinRapidity(min)
+{
+    char name[50];
+    sprintf(name,"_%f_%f",myMinRapidity,myMaxRapidity);
+    TString tmp = name;
+    my_Name = "Rapidity" + tmp;
+    my_Short_Name = "Rapidity" + tmp;
 
+}
+
+bool RapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
+{
+    double 	p =	vtxTrack.GetMomentum().GetMag();
+    double 	pZ =	vtxTrack.GetMomentum().GetZ();
+    double mass = 0.1396;
+    double E = sqrt(pow(mass, 2) + p*p);
+    double rapidity = 0.5 * log((E + pZ) / (E - pZ)) - beamRapidity/2;
+
+    if (rapidity > myMaxRapidity || rapidity < myMinRapidity) return 0;
+    myNEntries++;
+    return 1;
+}
+
+bool RapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
+{
+    double 	p =	vtxTrack.GetMomentum().GetMag();
+    double 	pZ =	vtxTrack.GetMomentum().GetZ();
+    double mass = 0.1396;
+    double E = sqrt(pow(mass, 2) + p*p);
+    double rapidity = 0.5 * log((E + pZ) / (E - pZ)) - beamRapidity/2;
+
+    if (rapidity > myMaxRapidity || rapidity < myMinRapidity) return 0;
+    myNEntries++;
+    return 1;
+}
 
 PhiCut::PhiCut(double min_Phi, double max_Phi):
 	myMaxPhi(max_Phi),
@@ -1237,79 +1481,107 @@ TString DiluteCut::GetShortNameWithPar() //FIXME
 	return name;
 }
 
-AcceptRapidityCut::AcceptRapidityCut()
+//unfortunately this cut has an error if I put the hist initialization inside the switch operator
+AcceptRapidityCut::AcceptRapidityCut(eAcceptanceType acceptType, double minEfficiency)
 {
-	TFile* in_file;
-	TString nameHist; 
-	switch (beamMomentum)
-	{
-	case 150:
-		nameHist = "158";
-		break;
-	case 20:
-		nameHist = "20";
-		break;
-	case 19:
-		nameHist = "20";
-		break;
-	case 31:
-		nameHist = "31";
-		break;
-	case 30:
-		nameHist = "31";
-		break;
-	case 40:
-		nameHist = "40";
-		break;
-	case 80:
-		nameHist = "80";
-		break;
-	case 75:
-		nameHist = "80";
-		break;
-	default:
-		nameHist = "158";
-		cout << "Error no such beam energy. 158 are setted" << endl;
-		break;
-	} 
-	switch (systemType)
-	{
-	case BeBe:
-		//myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
-		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
-		break;
-	default:
-		//myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
-		myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
-		break;
-	}
+    myAcceptanceType = acceptType;
+    myMinSetupEfficiency = minEfficiency;
+    TFile *in_file;
+    TString nameHist;
+    switch (beamMomentum) {
+        case 150:
+            nameHist = "158";
+            break;
+        case 20:
+            nameHist = "20";
+            break;
+        case 19:
+            nameHist = "20";
+            break;
+        case 31:
+            nameHist = "31";
+            break;
+        case 30:
+            nameHist = "31";
+            break;
+        case 40:
+            nameHist = "40";
+            break;
+        case 80:
+            nameHist = "80";
+            break;
+        case 75:
+            nameHist = "80";
+            break;
+        default:
+            nameHist = "158";
+            cout << "Error no such beam energy. 158 are setted" << endl;
+            break;
+    }
+    switch (systemType) {
+        case BeBe:
+            //myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
+            myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
+            break;
+        default:
+            //myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/ac_map_BeBe_Tobiasz.root";
+            myPath = "/afs/cern.ch/work/a/aseryako/public/acceptance_maps/acc_map_BeBe_100_v2.root";
+            break;
+    }
 
-	in_file= TFile::Open(string(myPath).c_str());
-	//TH3D* AcceptRapidityHist = (TH3D*)in_file->GetObjectChecked("newAcc", "TH3D");
-	//TH3C* AcceptHist = (TH3C*)in_file->GetObjectChecked(nameHist, "TH3C");
-	//myAcceptHist = (TH3C*)AcceptHist->Clone("myAccCopy");
-	TH3F* AcceptHist = (TH3F*)in_file->GetObjectChecked(nameHist, "TH3F");
-	myAcceptHist = (TH3F*)AcceptHist->Clone("myAccCopy");
+    in_file = TFile::Open(string(myPath).c_str());
+    TH3F *AcceptHist = (TH3F *) in_file->GetObjectChecked(nameHist, "TH3F");
+    myAcceptHist = (TH3F *) AcceptHist->Clone("myAccCopy");
 
-	myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(1);
-	myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(1);
-	myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(1);
+    myXAxLowEdge = myAcceptHist->GetXaxis()->GetBinLowEdge(1);
+    myYAxLowEdge = myAcceptHist->GetYaxis()->GetBinLowEdge(1);
+    myZAxLowEdge = myAcceptHist->GetZaxis()->GetBinLowEdge(1);
 
-	myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(1);
-	myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(1);
-	myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(1);
+    myXAxBinWidth = myAcceptHist->GetXaxis()->GetBinWidth(1);
+    myYAxBinWidth = myAcceptHist->GetYaxis()->GetBinWidth(1);
+    myZAxBinWidth = myAcceptHist->GetZaxis()->GetBinWidth(1);
 
-	myNXBins = myAcceptHist->GetXaxis()->GetNbins() + 1;
-	myNYBins = myAcceptHist->GetYaxis()->GetNbins() + 1;
-	myNZBins = myAcceptHist->GetZaxis()->GetNbins() + 1;
+    myNXBins = myAcceptHist->GetXaxis()->GetNbins() + 1;
+    myNYBins = myAcceptHist->GetYaxis()->GetNbins() + 1;
+    myNZBins = myAcceptHist->GetZaxis()->GetNbins() + 1;
 
-	my_Name = "AcceptRapidity_map";
-	my_Short_Name = "ARMap";
+    char name2[50];
+    sprintf(name2, "_%d", myMinSetupEfficiency);
+    TString tmp = name2;
+    my_Name = "AcceptRapidityMap_NA61" + tmp;
+    my_Short_Name = "ARMap" + tmp;
+
+
+    switch (acceptType) {
+        case NA61:
+            my_Name = "AcceptRapidityMap_NA61" + tmp;
+            my_Short_Name = "ARMap_NA61" + tmp;
+            break;
+        case NA49:
+            my_Name = "AcceptRapidityMap_NA49";
+            my_Short_Name = "ARMap_NA49";
+            break;
+        case NA49M:
+            my_Name = "AcceptRapidityMap_NA49M";
+            my_Short_Name = "ARMap_NA49M";
+            break;
+        case NA49NLarge:
+            my_Name = "AcceptRapidityMap_NA49NLarge";
+            my_Short_Name = "ARMap_NA49NLarge";
+            break;
+        case NA49NSmall:
+            my_Name = "AcceptRapidityMap_NA49NSmall";
+            my_Short_Name = "ARMap_NA49NSmall";
+            break;
+        default:
+            cout << "ERROR: no such acceptance map" << endl;
+            break;
+    }
 }
 
 AcceptRapidityCut::~AcceptRapidityCut()
 {
-	delete myAcceptHist;
+    delete myAcceptHist;
 }
 
 bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
@@ -1337,26 +1609,105 @@ bool AcceptRapidityCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTra
 	}else
 		phi_reflected = phi;
 
+    switch (myAcceptanceType) {
+        case NA49:
+            if (rapidity < 0 || rapidity > (beamRapidity / 2))
+                return 0;
+            break;
+        case NA49M:
+            if (rapidity < 1.1 || rapidity > (beamRapidity / 2))
+                return 0;
+            break;
+        case NA49NLarge:
+            if (rapidity < 1.09 || rapidity > 2.59) {
+                return 0;
+            }
+            double curve;
+            if (phi_reflected == 0)
+                curve = 1.5;
+            else {
+                if (rapidity > 3.9 - 2.91 && rapidity < 4.1 - 2.91) curve = 1 / (0 + (phi_reflected * phi_reflected) /
+                                                                                     6500) + 0.3;
+                if (rapidity > 4.1 - 2.91 && rapidity < 4.3 - 2.91) curve = 1 / (0 + (phi_reflected * phi_reflected) /
+                                                                                     5500) + 0.3;
+                if (rapidity > 4.3 - 2.91 && rapidity < 4.5 - 2.91) curve = 1 / (0 + (phi_reflected * phi_reflected) /
+                                                                                     4500) + 0.25;
+                if (rapidity > 4.5 - 2.91 && rapidity < 4.7 - 2.91) curve = 1 / (0 + (phi_reflected * phi_reflected) /
+                                                                                     3500) + 0.25;
+                if (rapidity > 4.7 - 2.91 && rapidity < 4.9 - 2.91) curve = 1 / (0 + (phi_reflected * phi_reflected) /
+                                                                                     2500) + 0.2;
+                if (rapidity > 4.9 - 2.91 && rapidity < 5.1 - 2.91) curve = 1 / (0.5 + (phi_reflected * phi_reflected) /
+                                                                                       2500) + 0.2;
+                if (rapidity > 5.1 - 2.91 && rapidity < 5.3 - 2.91) curve = 1 / (1.0 + (phi_reflected * phi_reflected) /
+                                                                                       2500) + 0.1;
+                if (rapidity > 5.3 - 2.91 && rapidity < 5.5 - 2.91) curve = 1 / (1.5 + (phi_reflected * phi_reflected) /
+                                                                                       2500) + 0.1;
+            }
+            if (Pt > curve)
+                return 0;
+            if (Pt < 0.005)
+                return 0;
+            break;
+        case NA49NSmall:
+            if (rapidity < 1.1 || rapidity > 2.6)
+                return 0;
 
-	double_t a, b, c;
-	a = 1 + floor((rapidity - myXAxLowEdge) / myXAxBinWidth);
-	b = 1 + floor((phi_reflected - myYAxLowEdge) / myYAxBinWidth);
-	c = 1 + floor((Pt - myZAxLowEdge) / myZAxBinWidth);
-	if (a < 1 || b < 1 || c < 1) return 0;
-	if ((a<myNXBins) && (b<myNYBins) && (c<myNZBins)) {
-		double_t N_acc;
-		N_acc = myAcceptHist->GetBinContent(a, b, c);
-		if (N_acc<0.9)
-		//if (N_acc == 0)
-			return 0;
-		else {
-			myNEntries++;
-			return 1;
-		}
-	}
-	else
-		return 0;
+            double rapidity_proton;
+            double E_proton;
+            E_proton = sqrt(pow(pMass, 2) + P2);
 
+            rapidity_proton = 0.5 * log((E_proton + Pz) / (E_proton - Pz)) - beamRapidity / 2;
+            if (rapidity_proton > (beamRapidity / 2) - 0.5)
+                return 0;
+
+            double curve1;
+            if (phi_reflected == 0)
+                curve1 = 1.5;
+            else {
+                if (rapidity > 1.0 && rapidity < 1.2) curve1 = 1 / ((phi_reflected * phi_reflected) / 600) - 0.2;
+                if (rapidity > 1.2 && rapidity < 1.4) curve1 = 1 / ((phi_reflected * phi_reflected) / 700) - 0.2;
+                if (rapidity > 1.4 && rapidity < 1.6) curve1 = 1 / ((phi_reflected * phi_reflected) / 1000) - 0.2;
+                if (rapidity > 1.6 && rapidity < 1.8) curve1 = 1 / ((phi_reflected * phi_reflected) / 2600) - 0.5;
+                if (rapidity > 1.8 && rapidity < 2.0) curve1 = 1 / ((phi_reflected * phi_reflected) / 3000) - 0.4;
+                if (rapidity > 2.0 && rapidity < 2.2) curve1 = 1 / ((phi_reflected * phi_reflected) / 2500) - 0.3;
+                if (rapidity > 2.2 && rapidity < 2.4) curve1 = 1 / ((phi_reflected * phi_reflected) / 1800) - 0.3;
+                if (rapidity > 2.4 && rapidity < 2.6) curve1 = 1 / ((phi_reflected * phi_reflected) / 1000) - 0.1;
+            }
+            if (Pt > curve1)
+                return 0;
+            if (Pt < 0.005)
+                return 0;
+            break;
+        case NA61:
+            double_t a, b, c;
+            a = 1 + floor((rapidity - myXAxLowEdge) / myXAxBinWidth);
+            b = 1 + floor((phi_reflected - myYAxLowEdge) / myYAxBinWidth);
+            c = 1 + floor((Pt - myZAxLowEdge) / myZAxBinWidth);
+            if (a < 1 || b < 1 || c < 1)
+                return 0;
+            if ((a<myNXBins) && (b<myNYBins) && (c<myNZBins)) {
+                double_t N_acc;
+                N_acc = myAcceptHist->GetBinContent(a, b, c);
+                if (N_acc<myMinSetupEfficiency)
+                    return 0;
+            }
+            else
+                return 0;
+            break;
+        default:
+            cout << "ERROR: No Such AcMap. return false" << endl;
+            return false;
+            break;
+    }
+    if (myAcceptanceType != NA61)
+    {
+        const Track& track = recEvent.Get(vtxTrack.GetTrackIndex());
+        if ((track.GetNumberOfClusters(TrackConst::eVTPC1) + track.GetNumberOfClusters(TrackConst::eVTPC2) < 5)
+            || (track.GetNumberOfClusters(TrackConst::eVTPC2) + track.GetNumberOfClusters(TrackConst::eMTPC) < 5))
+             return 0;
+    }
+    myNEntries++;
+    return 1;
 }
 
 bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
@@ -1404,7 +1755,6 @@ bool AcceptRapidityCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTra
 
 double 	electronCut150_x[13] = { -0.120056, 0.323586, 0.545407, 0.80539, 1.07969, 1.19894, 1.32297, 1.14647, 0.86502, 0.430919, -0.162989, -0.227389, -0.120056 };
 double	electronCut150_y[13] = { 1.41806, 1.3779, 1.45056, 1.49263, 1.52131, 1.53087, 1.5978, 1.68767, 1.73547, 1.87888, 1.94772, 1.60545, 1.41806 };
-
 TCutG* electronCut150 = new TCutG("electronCut150", 13, electronCut150_x, electronCut150_y);
 
 double electronCut75_x[13] = { -0.374563, 0.0740766, 0.306915, 0.568148, 0.846418, 0.965676, 1.1758, 1.06222, 0.670369, 0.193335, -0.397279, -0.618759, -0.374563 };
@@ -1415,96 +1765,100 @@ double electronCut40_x[10] = { -0.703944, -0.226909, 0.0911135, 1.02247, 1.07358
 double electronCut40_y[10] = { 1.36965, 1.31561, 1.34886, 1.48188, 1.61905, 1.68556, 1.88509, 1.84352, 1.63568, 1.36965 };
 TCutG* electronCut40 = new TCutG("electronCut40", 10, electronCut40_x, electronCut40_y);
 
+double electronCut30_x[9] = { -0.709, -0.502, 0.28, 0.789, 1.128, 0.415, -0.398, -0.615, -0.709 };
+double electronCut30_y[9] = { 1.614, 1.727, 1.727, 1.684, 1.532, 1.346, 1.246, 1.374, 1.614 };
+TCutG* electronCut30 = new TCutG("electronCut30", 9, electronCut30_x, electronCut30_y);
+
+double electronCut19_x[9] = { -0.618, -0.448, 0.265, 0.631, 0.818, 0.29, -0.203, -0.48, -0.618 };
+double electronCut19_y[9] = { 1.449, 1.566, 1.592, 1.550, 1.459, 1.230, 1.209, 1.232, 1.449 };
+TCutG* electronCut19 = new TCutG("electronCut19", 9, electronCut19_x, electronCut19_y);
+
+double electronCut13_x[9] = { -1.69789, -1.56192, 0.363006, 0.93834, 0.541475, -0.435859, -1.07325, -1.98225, -1.69789 };
+double electronCut13_y[9] = { 1.20376, 1.79638, 1.79638, 1.59761, 1.40253, 1.22584, 0.938731, 0.330218, 1.20376 };
+TCutG* electronCut13 = new TCutG("electronCut13", 9, electronCut13_x, electronCut13_y);
+
 TCutG* eeCut::myTCutG;
 //TCutG* eeCut::myTCutG = new TCutG("electronCut150", 13, electronCut150_x, electronCut150_y);
 eeCut::eeCut()
 {
-	my_Name = "Electron";
-	my_Short_Name = "EE";
-	switch (beamMomentum)
-	{
-	case 150:
-		myTCutG = electronCut150;
-		break;
-	case 75:
-		myTCutG = electronCut75;
-	break;
-	case 40:
-		myTCutG = electronCut40;
-		break;
-	default:
-		cout << "Error with beam energy in eeCut" << endl;
-		break;
-	}
+    my_Name = "Electron";
+    my_Short_Name = "EE";
+    switch (beamMomentum)
+    {
+        case 150:
+            myTCutG = electronCut150;
+            break;
+        case 75:
+            myTCutG = electronCut75;
+            break;
+        case 40:
+            myTCutG = electronCut40;
+            break;
+        case 30:
+            myTCutG = electronCut30;
+            break;
+        case 19:
+            myTCutG = electronCut19;
+            break;
+        case 13:
+            myTCutG = electronCut13;
+            break;
+        default:
+            cout << "Error with beam energy in eeCut" << endl;
+            break;
+    }
 }
 
 bool eeCut::CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack)
 {
-	//	cout<<"Phi"<<endl;
-	double_t P, dEdx;
-	Vector vtxMomentum = vtxTrack.GetMomentum();
-	P = vtxMomentum.GetMag();
-	const Track& track = recEvent.Get(vtxTrack.GetTrackIndex());
-	dEdx = track.GetEnergyDeposit(evt::rec::TrackConst::eAll);
-	if (myTCutG->IsInside(log10(P), dEdx)) return 0; //Electron!
-	myNEntries++;
-	return 1;
+    //	cout<<"Phi"<<endl;
+    double_t P, dEdx;
+    Vector vtxMomentum = vtxTrack.GetMomentum();
+    P = vtxMomentum.GetMag();
+    const Track& track = recEvent.Get(vtxTrack.GetTrackIndex());
+    dEdx = track.GetEnergyDeposit(evt::rec::TrackConst::eAll);
+    if (myTCutG->IsInside(log10(P), dEdx)) return 0; //Electron!
+    myNEntries++;
+    return 1;
 }
 
 bool eeCut::CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack)
 {
-	if (abs(vtxTrack.GetParticleId()) == 11) return 0;
-	myNEntries++;
-	return 1;
+    if (abs(vtxTrack.GetParticleId()) == 11) return 0;
+    myNEntries++;
+    return 1;
 }
 
 TString eeCut::GetShortNameWithPar()
 {
-	return my_Short_Name;
+    return my_Short_Name;
 }
 
-//double dPSDMultArSc150M[10] = { 178, 178, 156, 127, 50, 42, 64, 124, 238, 238 };
-//double dPSDMultArSc150P[10] = { 524, 996, 1284, 1497, 2858, 3777, 4165, 3876, 1246, 524 };
-//TCutG* psdMultCloudTCutArSc150 = new TCutG("psdMultCloudTCutArSc150", 10, dPSDMultArSc150M, dPSDMultArSc150P);
 
-//double dPSDMultArSc150M[7] = { 178, 50, 42, 64, 124, 238, 238 };
-//double dPSDMultArSc150P[7] = { 0, 2858, 3777, 4165, 3876, 1246, 0 };
-//TCutG* psdMultCloudTCutArSc150 = new TCutG("psdMultCloudTCutArSc150", 7, dPSDMultArSc150M, dPSDMultArSc150P);
+double dPSDMultArSc150M[3] = { 210, 0, 0};
+double dPSDMultArSc150P[3] = { 0, 4000, 0};
+TCutG* psdMultCloudTCutArSc150 = new TCutG("psdMultCloudTCutArSc150", 3, dPSDMultArSc150M, dPSDMultArSc150P);
 
-double dPSDMultArSc150M[6] = { 80, 80, 30, 30, 300, 3000 };
-double dPSDMultArSc150P[6] = { 0, 2000, 4000, 4500, 4500,  0 };
-TCutG* psdMultCloudTCutArSc150 = new TCutG("psdMultCloudTCutArSc150", 6, dPSDMultArSc150M, dPSDMultArSc150P);
 
-double dPSDMultArSc150GarbageHighPSDM[4] = { 200, 200, 0, 0 };
-double dPSDMultArSc150GarbageHighPSDP[4] = { 4500, 8000, 8000, 4500 };
-TCutG* psdMultCloudTCutArSc150GarbageHighPSD = new TCutG("psdMultCloudTCutArSc150GarbageHighPSD", 
-	4, dPSDMultArSc150GarbageHighPSDM, dPSDMultArSc150GarbageHighPSDP);
+double dPSDMultArSc13M[3] = { 20, 0, 0};
+double dPSDMultArSc13P[3] = { 0, 200, 0};
+TCutG* psdMultCloudTCutArSc13 = new TCutG("psdMultCloudTCutArSc13", 3, dPSDMultArSc13M, dPSDMultArSc13P);
 
-double dPSDMultArSc150GarbageLowPSDLowNM[5] = { 50, 50, 42, 0, 0 };
-double dPSDMultArSc150GarbageLowPSDLowNP[5] = { 0, 2858, 3777, 3777, 0 };
-TCutG* psdMultCloudTCutArSc150GarbageLowPSDLowN = new TCutG("psdMultCloudTCutArSc150GarbageLowPSDLowN",
-	5, dPSDMultArSc150GarbageLowPSDLowNM, dPSDMultArSc150GarbageLowPSDLowNP);
+double dPSDMultArSc19M[3] = { 25, 0, 0};
+double dPSDMultArSc19P[3] = { 0, 400, 0};
+TCutG* psdMultCloudTCutArSc19 = new TCutG("psdMultCloudTCutArSc19", 3, dPSDMultArSc19M, dPSDMultArSc19P);
 
-double dPSDMultArSc150GarbageLowPSDHighNM[6] = { 178, 178, 156, 127, 50, 50 };
-double dPSDMultArSc150GarbageLowPSDHighNP[6] = { 0, 996, 1284, 1497, 2858, 0 }; 
-TCutG* psdMultCloudTCutArSc150GarbageLowPSDHighN = new TCutG("psdMultCloudTCutArSc150GarbageLowPSDHighN",
-	6, dPSDMultArSc150GarbageLowPSDHighNM, dPSDMultArSc150GarbageLowPSDHighNP);
+double dPSDMultArSc30M[3] = { 40, 0, 0};
+double dPSDMultArSc30P[3] = { 0, 800, 0};
+TCutG* psdMultCloudTCutArSc30 = new TCutG("psdMultCloudTCutArSc30", 3, dPSDMultArSc30M, dPSDMultArSc30P);
 
-double dPSDMultArSc13M[5] = { 16, 4, 0, 20, 90};
-double dPSDMultArSc13P[5] = { 0, 250, 400, 400, 0};
-TCutG* psdMultCloudTCutArSc13 = new TCutG("psdMultCloudTCutArSc13", 5, dPSDMultArSc13M, dPSDMultArSc13P);
+double dPSDMultArSc40M[3] = { 50, 0, 0};
+double dPSDMultArSc40P[3] = { 0, 1000,0};
+TCutG* psdMultCloudTCutArSc40 = new TCutG("psdMultCloudTCutArSc40", 3, dPSDMultArSc40M, dPSDMultArSc40P);
 
-double dPSDMultArSc19M[6] = { 15, 8, 5, 20, 80, 120 };
-double dPSDMultArSc19P[6] = { 0, 400, 700, 700, 400, 0 };
-TCutG* psdMultCloudTCutArSc19 = new TCutG("psdMultCloudTCutArSc19", 6, dPSDMultArSc19M, dPSDMultArSc19P);
-
-double dPSDMultArSc30M[5] = { 30, 10, 0, 30, 140};
-double dPSDMultArSc30P[5] = { 0, 800, 1100, 1100, 0};
-TCutG* psdMultCloudTCutArSc30 = new TCutG("psdMultCloudTCutArSc30", 5, dPSDMultArSc30M, dPSDMultArSc30P);
-
-double dPSDMultArSc40M[6] = { 40, 40, 10, 10, 150, 150 };
-double dPSDMultArSc40P[6] = { 0, 500, 1100, 1600, 800, 0 };
-TCutG* psdMultCloudTCutArSc40 = new TCutG("psdMultCloudTCutArSc40", 6, dPSDMultArSc40M, dPSDMultArSc40P);
+double dPSDMultArSc75M[3] = {110, 0,0};//{ 55, 55, 0, 0};
+double dPSDMultArSc75P[3] = {0,2100,0};//{ 0, 900, 2000, 0};
+TCutG* psdMultCloudTCutArSc75 = new TCutG("psdMultCloudTCutArSc75", 3, dPSDMultArSc75M, dPSDMultArSc75P);
 
 TCutG* MultPSDCloudCut::myTCutG;
 MultPSDCloudCut::MultPSDCloudCut(bool bRaw, ePSDNClouds eCloud)
@@ -1580,6 +1934,22 @@ MultPSDCloudCut::MultPSDCloudCut(bool bRaw, ePSDNClouds eCloud)
 				break;
 			}
 			break;
+            case 75:
+                switch (systemType)
+                {
+                    case ArSc:
+                        if (nPSDMods == 28){
+                            if (eCloud == good){
+                                myTCutG = psdMultCloudTCutArSc75;
+                                bInit = true;
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
 		case 150:
 			switch (systemType)
 			{
@@ -1592,21 +1962,6 @@ MultPSDCloudCut::MultPSDCloudCut(bool bRaw, ePSDNClouds eCloud)
 					case good:
 						myTCutG = psdMultCloudTCutArSc150;
 						cout << "good cut" << endl;
-						bInit = true;
-						break;
-					case garbageHighPSD:
-						myTCutG = psdMultCloudTCutArSc150GarbageHighPSD;
-						cout << "GarbageHighPSD" << endl;
-						bInit = true;
-						break;
-					case garbageLowPSDLowN:
-						myTCutG = psdMultCloudTCutArSc150GarbageLowPSDLowN;
-						cout << "GarbageLowPSDLowN" << endl;
-						bInit = true;
-						break;
-					case garbageLowPSDHighN:
-						myTCutG = psdMultCloudTCutArSc150GarbageLowPSDHighN;
-						cout << "GarbageLowPSDHighN" << endl;
 						bInit = true;
 						break;
 					default:
@@ -1647,10 +2002,14 @@ bool MultPSDCloudCut::CheckEvent(Event& event, bool bSim)
 		PSDEnergy = PSDEnergy + psd.GetModule(i + 1).GetEnergy();
 	cout << "multPSDCut: " << myMultiplicity <<"  PSD: "<< PSDEnergy << endl;
 	if (myTCutG->IsInside(myMultiplicity, PSDEnergy)) {
+//        if (event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5)> 80)
 		myNEntries++;
-		return true;
-	}
-	else return false;
+
+		    return true;
+	} //FIXME очень плохо
+
+		return false;
+
 
 }
 
@@ -1799,7 +2158,7 @@ bool S5Cut::CheckEvent(Event& event, bool bSim)
     if (myBRaw == false)
         return true;//notrhing to do
     double A = event.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
-    if (A < myUpLimit){
+    if (A < myUpLimit){ //FIXME
         myNEntries++;
         return true;
     }
@@ -1815,6 +2174,7 @@ TString S5Cut::GetShortNameWithPar()
     name = my_Short_Name + name2;
     return name;
 }
+
 
 S2Cut::S2Cut(double upLimit, bool bRaw)
 {
@@ -1915,7 +2275,7 @@ bool StrangeCut::CheckTrack(SimEvent& simEvent, const sim::VertexTrack& vtxTrack
     return false;
 }
 
-RunWith0EnergyInOneModuleCut::RunWith0EnergyInOneModuleCut(bool bRaw)
+/*RunWith0EnergyInOneModuleCut::RunWith0EnergyInOneModuleCut(bool bRaw)
 {
     myBRaw = bRaw;
 	my_Name = "Zero_Energy_PSD_module";
@@ -1946,7 +2306,7 @@ bool RunWith0EnergyInOneModuleCut::CheckEvent(Event &event, bool bSim)
     }
 	myNEntries++;
 	return true;
-}
+}*/
 
 RunWith0EnergyInOneModuleCutVer2::RunWith0EnergyInOneModuleCutVer2(bool bRaw, ePSDModulCombinations ePSDSet)
 {
@@ -2358,7 +2718,6 @@ WFAT4Cut::WFAT4Cut(double time1, double time2, double timeCut):
 {
     my_Name = "WFAT4";
     my_Short_Name = "WFAT4";
-    TString name;
     char name2[50];
     sprintf(name2,"_%f_%f_%f",myWfaTime1,myWfaTime2,myWfaTimeCut);
     my_Name = my_Name+name2;
@@ -2549,30 +2908,198 @@ bool BPD3RMS::CheckEvent(Event &ev, bool bSim)
 	return true;
 }
 
+BadEventsBadRunsPSDCut::BadEventsBadRunsPSDCut()
+{
+	my_Short_Name="0PSDBadEvents";
+	my_Name = "0PSDBadEvents";
+    switch (beamMomentum){
+        case 13:
+            myNBadPeriods = nRunsWith0EnergyInOnePSDModule13;
+            myArray =  arRunsWith0EnergyInOnePSDModule13;
+            break;
+        case 75:
+            myNBadPeriods = nRunsWith0EnergyInOnePSDModule75;
+            myArray =  arRunsWith0EnergyInOnePSDModule75;
+            break;
+        case 150:
+            myNBadPeriods = nRunsWith0EnergyInOnePSDModule150;
+            myArray =  arRunsWith0EnergyInOnePSDModule150;
+            break;
+        default:
+            myNBadPeriods = 0;
+            myArray = arRunsWith0EnergyInOnePSDModule13;
+            break;
+    }
+
+}
+
+bool BadEventsBadRunsPSDCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (bSim) return false;
+    int run;
+    run = ev.GetEventHeader().GetRunNumber();
+    for (int i = 0; i<myNBadPeriods; i++){
+        if (run == myArray[i*3]){
+            int iEvent = ev.GetEventHeader().GetId();
+            if (iEvent>=myArray[i*3+1] && iEvent<=myArray[i*3+2])
+                return false;
+        }
+    }
+    myNEntries++;
+    return true;
+}
+
+FPGACut::FPGACut(ePSDModulCombinations comb, bool bRaw)
+{
+	TString name;
+	myBRaw = bRaw;
+	for (int i = 0; i < 45; i++)
+		myPSDModArray[i] = 0;
+
+	switch (comb)
+	{
+		case e28Central:
+			for (int i = 1; i < 29; i++)
+				myPSDModArray[i] = 1;
+			name = "28Central";
+			break;
+		case e16Central:
+			for (int i = 1; i < 17; i++)
+				myPSDModArray[i] = 1;
+			name = "16Central";
+			break;
+		case e28Periferal:
+			for (int i = 17; i < 45; i++)
+				myPSDModArray[i] = 1;
+			name = "28Periferal";
+			break;
+		case e6Module:
+			myPSDModArray[6] = 1;
+			name = "6Module";
+			break;
+		case e8Module:
+			myPSDModArray[8] = 1;
+			name = "8Module";
+			break;
+		case e10Module:
+			myPSDModArray[10] = 1;
+			name = "10Module";
+			break;
+		case e11Module:
+			myPSDModArray[11] = 1;
+			name = "11Module";
+			break;
+		case e29Module:
+			myPSDModArray[29] = 1;
+			name = "29Module";
+			break;
+		case e44Module:
+			myPSDModArray[44] = 1;
+			name = "44Module";
+			break;
+		case eAll:;
+		default:
+			for (int i = 1; i < 45; i++)
+				myPSDModArray[i] = 1;
+			name = "All";
+			break;
 
 
+	}
+	my_Name = "FPGA_cut_" + name;
+	my_Short_Name = "FPGA" + name;
+}
 
 
+bool FPGACut::CheckEvent(Event &event, bool bSim)
+{
+    if (myBRaw == false)
+        return true;//notrhing to do
+    RecEvent *pRecEvent = &event.GetRecEvent();
+    PSD &psd = pRecEvent->GetPSD();
+//    for (int i = 0; i < nPSDModules; i++) {
+ //       if (myPSDModArray[i])
+//        if (psd.GetModule(i+1).GetEnergy() == 0)
+ //           return false;
+ //   }
+    if (psd.GetStatus() == 0) {
+        myNEntries++;
+        return true;
+    }
+    return false;
+}
 
 
+S5CloudCut::S5CloudCut(double S5, double maxN, double maxPSD28, eMultiplicityType multType, bool bRaw)
+{
+    TString name;
+    switch (multType){
+        case allTracks:
+            name = "_allTr";
+            break;
+        case nTrackInVtxFit:
+            name = "_nTrInFit";
+            break;
+        default:
+            name = "_noMultDef";
+            break;
+    }
+    myBRaw = bRaw;
+    myMultType = multType;
+    myS5 = S5;
+
+	char name2[50];
+	sprintf(name2,"_%d_%d_%d",myS5,maxN,maxPSD28);
+
+    my_Name = "S5CloudCut"+name+name2;
+    my_Short_Name = "S5Cloud"+name+name2;
+
+    myMultCoord[0] = maxN;
+    myMultCoord[1] = 0;
+    myMultCoord[2] = 0;
+    myPSD28Coord[0] = 0;
+    myPSD28Coord[1] = maxPSD28;
+    myPSD28Coord[2] = 0;
+    myTriangleZone = new TCutG(my_Name,3,myMultCoord, myPSD28Coord);
+
+}
+
+bool S5CloudCut::CheckEvent(Event &ev, bool bSim)
+{
+    if (bSim == true)
+        return true;
+
+    double S5 = ev.GetRawEvent().GetBeam().GetTrigger().GetADC(det::TriggerConst::eS5);
+    if (S5 < myS5){
+        myNEntries++;
+        return true;
+    }
+    double PSD28E = 0;
+	RecEvent* pRecEvent = &ev.GetRecEvent();
+	PSD &psd = pRecEvent->GetPSD();
+    for (int i = 0; i<nPSDMods; i++)
+        PSD28E = PSD28E + psd.GetModule(i + 1).GetEnergy();
+
+    double N = 0;
+    switch (myMultType){
+        case allTracks:
+            for (std::list<rec::Track>::const_iterator trackIter = pRecEvent->Begin<rec::Track>();
+                 trackIter != pRecEvent->End<rec::Track>(); ++trackIter)
+            {
+                const rec::Track& track = *trackIter;
+                N++;
+            }
+            break;
+        case nTrackInVtxFit:
+            N = pRecEvent->GetMainVertex().GetNumberOfTracksInFit();
+            break;
+        default:
+            break;
+    }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (myTriangleZone->IsInside(N,PSD28E))
+        return false;
+    myNEntries++;
+    return true;
+}

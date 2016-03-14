@@ -159,7 +159,7 @@ public:
 	void AddNVtxTracksCut(unsigned int nVtxTracks);
 	void AddZVtxCut();
 	void AddZVtxCut(double_t minZ, double_t maxZ);
-    void AddCentrality(double_t minE, double_t maxE);
+    void AddCentrality(int minPercent, int maxPercent);
 	void AddPSDEnergyCut(double maxE, ePSDModulCombinations psdSet);
 	void AddPSDEnergyCut(double minE, double maxE, ePSDModulCombinations psdSet);
 	void AddPSDCloudsCut();
@@ -179,6 +179,9 @@ public:
 	void AddZeroPositiveTracksCut();
     void AddBeamPositionInSCut(eMyS sType, eMyCoordinate coord, double lowBound, double upBound);
     void AddBPD3RMS();
+    void Remove0BinsEvents();
+	void AddFPGACut(ePSDModulCombinations comb);
+	void AddS5TracksCloudCut(double S5, double maxN, double maxPSD28, eMultiplicityType multType);
 
     void AddVtxTrackStatusCut();
 	void AddImpactPointCut();
@@ -193,9 +196,11 @@ public:
 	void AddPCut();
 	void AddPCut(double_t minP, double_t maxP);
     void AddAcceptCut();
-	void AddAcceptRapidityCut();
+	void AddAcceptRapidityCut(double minEfficiency);
+    void AddAcceptRapidityCut(eAcceptanceType acType,double minEfficiency);
 	void AddEECut();
 	void AddEtaCut(double_t minEta, double_t maxEta);
+    void AddRapidityCut(double_t min, double_t max);
 	void AddPhiCut(double_t minPhi, double_t maxPhi);
 	void AddChargeTrkCut(int charge);
 	void AddDiluteCut(double remove_track_percent);
@@ -268,12 +273,14 @@ private:
     TH2D  *ptPhiHist, *ptPhiHist0, *ptPhiHist1;
     TH2D  *BPD1Hist, *BPD2Hist, *BPD3Hist, *ImpParHist;
     
-    TH1D  *WFAHist, *fitVtxHist;
+    TH1D  *WFAHist;
 	TH1D  *WFAT4Hist;
     TH1D  *MHTDCHist;
 	TH2D  *dEdxPHist0, *dEdxPHist1, *fitVtxNHist; //Ya pomenyal
     
     TH2D	*psdEnergyNHist;
+	TH2D	*psdEnergyTracksInFitHist;
+	TH2D	*psdEnergyAllTracksHist;
 	TH2D	*psdEnergyS5Hist;
 	TH2D	*multS5Hist;
     TH2D    *S1S2Hist;
@@ -287,7 +294,6 @@ private:
 	*BeamPositionHistPSDLevelHist;
 
 	TH2D    *VtxTracksVsAllTracksHist;
-    TH1D    *BadGoodRationHist;
 
     TH2D    *BPD3XSignalNVtxTracks;
     TH2D    *BPD3YSignalNVtxTracks;
@@ -490,3 +496,22 @@ private:
 	THnSparseD* myModuleSparse;
 };
 
+class PSD0BinsFindHandler:public BaseHandler
+{
+public:
+	PSD0BinsFindHandler(const char* nameOut);
+	PSD0BinsFindHandler(const char* nameOut, bool sim);
+	~PSD0BinsFindHandler();
+	void PutTrack(const evt::rec::VertexTrack& vtxTrack, Event& ev)
+	{this->Init();}
+	void PutTrack(const evt::sim::VertexTrack& vtxTrack, Event& ev)
+	{this->Init();}
+	void EndOfEvent(Event& ev);
+	void Init();
+
+private:
+	PSD0BinsFindHandler();
+	TH2D *iRunsIEventsHists[nPSDModules];
+    TH1D *myEnergyInModulesWith0Status;
+    TH1D *myEnergyInModulesWithNon0Status;
+};

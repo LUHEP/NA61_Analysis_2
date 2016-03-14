@@ -149,10 +149,8 @@ void HandlerList::EatEvent(Event &event)
 		printf("running GOOD event %5d time: %s\n",(int) goodEventCounter,buf);
 	} 
 
-	
 	if (hasRecHandler==true) {
 		RecEvent &recEvent = event.GetRecEvent();
-
 		if (hasRawHandler == false) {
 			Vertex &mainVertex = recEvent.GetMainVertex();
 			//new 
@@ -245,7 +243,7 @@ void HandlerList::EatEvent(Event &event)
 
 		}*/
 	}
-//	cout<<"endOfEvent"<<endl;
+//    cout<<"endOfEvent"<<endl;
     this->EndOfEvent(event);
 	for (int i=0; i<length; i++)
 		pGoodEvent[i]=false;

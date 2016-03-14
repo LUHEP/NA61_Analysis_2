@@ -259,7 +259,7 @@ private:
 class CentralityCut:public EventCut
 {
 public:
-    CentralityCut(double lowPer, double upPer, bool bRaw);
+    CentralityCut(int lowPer, int upPer, bool bRaw);
     ~CentralityCut(){}
 	void InitLegacyCentrality();
     bool CheckEvent(Event& event, bool bSim);
@@ -268,10 +268,13 @@ private:
 	CentralityCut();
     double myMinEPSD;
     double myMaxEPSD;
-    const double myLowPer;
-    const double myUpPer;
+    const int myLowPer;
+    const int myUpPer;
     LegacyCentrality* pDetermineCentrality;
 	bool bInit;
+    bool bAllIsOk;
+    ePSDModulCombinations myPSDModuleSet;
+    bool myPSDModArray[46];
 };
 
 class MultPSDCloudCut : public EventCut
@@ -395,42 +398,27 @@ private:
     const double myMinP;
 };
 
-class AcceptCut:public TrackCut
-{
-public:
-    AcceptCut();
-    AcceptCut(TString configPath); 
-    ~AcceptCut();
-    bool CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack);
-    bool CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack);
-	TString GetShortNameWithPar() { return my_Short_Name;}
-private:
-    const TString myConfigPath; 
-    TH3D* itsAcceptHist;
-
-	double_t myXAxLowEdge, myYAxLowEdge, myZAxLowEdge;
-	double_t myXAxBinWidth, myYAxBinWidth, myZAxBinWidth;
-	unsigned int myNXBins, myNYBins, myNZBins;
-	
-};
 
 class AcceptRapidityCut :public TrackCut
 {
 public:
-	AcceptRapidityCut();
-	~AcceptRapidityCut();
+    AcceptRapidityCut(eAcceptanceType acType, double minEfficiency);
+    ~AcceptRapidityCut();
 	bool CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack);
 	bool CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack);
 	TString GetShortNameWithPar() { return my_Short_Name; }
 private:
-	TString myPath;
+    AcceptRapidityCut();
+    TString myPath;
 	//TH3C* myAcceptHist;
 	TH3F* myAcceptHist;
-
 
 	double myXAxLowEdge, myYAxLowEdge, myZAxLowEdge;
 	double myXAxBinWidth, myYAxBinWidth, myZAxBinWidth;
 	double myNXBins, myNYBins, myNZBins;
+
+    eAcceptanceType myAcceptanceType;
+    double myMinSetupEfficiency;
 };
 
 
@@ -447,6 +435,22 @@ private:
 	EtaCut();
 	const double myMinEta;
 	const double myMaxEta;
+};
+
+//all particles are pions =/
+class RapidityCut:public TrackCut
+{
+public:
+
+    RapidityCut(double minRapidity, double maxRapidity);
+    ~RapidityCut(){}
+    bool CheckTrack(RecEvent& recEvent, const VertexTrack& vtxTrack);
+    bool CheckTrack(SimEvent& simEvent, const evt::sim::VertexTrack& vtxTrack);
+    TString GetShortNameWithPar(){ return my_Short_Name; }
+private:
+    RapidityCut();
+    const double myMinRapidity;
+    const double myMaxRapidity;
 };
 
 class PhiCut:public TrackCut //phi = [-pi;pi] 
@@ -581,7 +585,7 @@ private:
 
 // to exclude events with not working PSD modules
 // написан, конечно, совершенно не оптимально =/
-class RunWith0EnergyInOneModuleCut : public EventCut
+/*class RunWith0EnergyInOneModuleCut : public EventCut
 {
 public:
     RunWith0EnergyInOneModuleCut(bool bRaw);
@@ -593,7 +597,7 @@ private:
     RunWith0EnergyInOneModuleCut();
     bool myBRaw;
 
-};
+};*/
 
 class RunWith0EnergyInOneModuleCutVer2 : public EventCut
 {
@@ -775,9 +779,51 @@ private:
     bool myRaw;
 };
 
+class BadEventsBadRunsPSDCut:public EventCut
+{
+public:
+    BadEventsBadRunsPSDCut();
+    ~BadEventsBadRunsPSDCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    bool myBRaw;
+    int myNBadPeriods;
+    const int* myArray;
+};
 
+class FPGACut: public EventCut
+{
+public:
+    FPGACut(ePSDModulCombinations comb, bool bRaw);
+    ~FPGACut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() { return my_Short_Name;}
+private:
+    FPGACut();
+    bool myBRaw;
+    ePSDModulCombinations myPSDModSet;
+    bool myPSDModArray[45];
+};
 
-
+//Cut all events with s5>myS5 below line from (0,myMaxMult) to (myMaxPSD28Energy,0);
+//only for ArSc analysis
+class S5CloudCut: public EventCut
+{
+public:
+    S5CloudCut(double S5, double maxN, double maxPSD28, eMultiplicityType multType, bool bRaw);
+    ~S5CloudCut(){}
+    bool CheckEvent(Event& ev, bool bSim);
+    TString GetShortNameWithPar() {return my_Short_Name;}
+private:
+    S5CloudCut();
+    bool myBRaw;
+    double myS5;
+    eMultiplicityType myMultType;
+    TCutG* myTriangleZone;
+    double myMultCoord[3];
+    double myPSD28Coord[3];
+};
 
 
 

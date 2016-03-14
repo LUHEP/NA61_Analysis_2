@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	HandlerList* HandList = new HandlerList();
 	// ----- Handlers
 
-	const int N0 = 1;
+	const int N0 = 0;
 	OneWindHandler* arOneWindHandler[N0];
 	for (int i = 0; i<N0; i++){
 		TString name;
@@ -139,23 +139,17 @@ int main(int argc, char* argv[])
 		arOneWindHandler[i] = new OneWindHandler(name + "Raw.root", false);
 
 
-//		arOneWindHandler[i]->AddPSDEnergyCut(1850, e28Central);
-		arOneWindHandler[i]->AddStandardCutsRaw();
-        //arOneWindHandler[i]->AddLocalRatioCut(0.25,0,50);
+        arOneWindHandler[i]->AddStandardCutsRaw();
         if (i==1)
-			arOneWindHandler[i]->AddPSDEnergyCut(800, 5000, e28Periferal);
+			arOneWindHandler[i]->AddS5TracksCloudCut(80,100,200,nTrackInVtxFit);
+//		    arOneWindHandler[i]->AddPSDEnergyCut(1470, e28Central);
 
-		if (i==2)
-			arOneWindHandler[i]->AddS5Cut(100);
-		if (i==3) {
-			arOneWindHandler[i]->AddPSDEnergyCut(800, 5000, e28Periferal);
-			arOneWindHandler[i]->AddS5Cut(100);
-		}
-//		arOneWindHandler[i]->AddPSDEnergyCut(2500, e28Central);
+
+
 		HandList->AddHandler(arOneWindHandler[i]);
 	}
 	
-    const int N1=0;//1;
+    const int N1=3;//1;
 	PtNFluctuationHandler* arHandlerFlucPtNRaw[N1];
     for (int i =0; i<N1; i++){
         TString name;
@@ -164,16 +158,22 @@ int main(int argc, char* argv[])
         sprintf(name2,"_%i",i);
         name = nameBasic + name2;
 		arHandlerFlucPtNRaw[i] = new PtNFluctuationHandler(name + "Raw.root", false);
-		if (i==0 || i==1)
-			arHandlerFlucPtNRaw[i]->AddRunNumberCut(0,20445);
-		if (i==2 || i==3)
-			arHandlerFlucPtNRaw[i]->AddRunNumberCut(20445,20500);
 		arHandlerFlucPtNRaw[i]->AddStandardCutsRaw();
-		if (i==1 || i==3)
-			arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(1850, e28Central);
+		if (i==0 || i==1)
+			arHandlerFlucPtNRaw[i]->AddCentrality(0,1);
+        if (i==2 || i==3)
+            arHandlerFlucPtNRaw[i]->AddCentrality(1,5);
+        if (i==4 || i==5)
+            arHandlerFlucPtNRaw[i]->AddCentrality(5,10);
+        if (i==6 || i==7)
+            arHandlerFlucPtNRaw[i]->AddCentrality(10,15);
+        if (i==1 || i==3 || i==5 || i==7)
+            arHandlerFlucPtNRaw[i]->AddAcceptRapidityCut(0.95);
+        else arHandlerFlucPtNRaw[i]->AddAcceptRapidityCut(0.9);
 
 
-		//arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(0, 80);
+
+        //arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(0, 80);
 //		if (i == 1)
 	//		arHandlerFlucPtNRaw[i]->AddAcceptRapidityCut();
 //			arHandlerFlucPtNRaw[i]->AddPSDEnergyCut(0, 1850);
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 		HandList->AddHandler(arHandlerEtaFlucPtNRaw[i]);
 	}
 
-	const int N4 = 1;
+	const int N4 = 0;
 	TimeHandler* arTime[N4];
 	for (int i =0; i<N4; i++){
 		TString name;
@@ -238,37 +238,156 @@ int main(int argc, char* argv[])
 		name = nameBasic + name2;
 		arTime[i] = new TimeHandler(name + "Raw.root", false);
 		arTime[i]->AddStandardCutsRaw();
-//        if (i==1)
- //           arTime[i]->AddPSDEnergyCut(0,2700, e28Central);
-//		arTime[i]->AddPSDCloudsCut();
-//        if (i==0)
- //   		arTime[i]->AddPSDEnergyCut(-0.001, 1, e6Module);
-  //      if (i==1)
-   //         arTime[i]->AddPSDEnergyCut(-0.001, 1, e10Module);
-    //    if (i==2)
-//            arTime[i]->AddPSDEnergyCut(-0.001, 1, e11Module);
- //       if (i==3)
-  //          arTime[i]->AddPSDEnergyCut(-0.001, 1, e29Module);
-   //     if (i==4)
-    //        arTime[i]->AddPSDEnergyCut(-0.001, 1, e44Module);
+        if (i==1)
+            arTime[i]->AddPSDEnergyCut(0,900, e28Central);
+
 		HandList->AddHandler(arTime[i]);
 	}
 
 	const int N6 = 0;
 	OneWindHandler* arOneWindHandler1[N6];
 	for (int i = 0; i<N6; i++){
+        if (i==3) continue;
+        if (i==8) continue;
+
 		TString name;
 		TString nameBasic = "One_Wind";
 		char name2[50];
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arOneWindHandler1[i] = new OneWindHandler(name + "Raw.root", false);
-		arOneWindHandler1[i]->AddStandardCutsRaw();
-//		arOneWindHandler1[i]->AddPSDEnergyCut(0, 2400);
-		if (i == 1)
-			arOneWindHandler1[i]->AddAcceptRapidityCut();
 
-//		arOneWindHandler1[i]->AddBPDCut(0.2, BPD3);
+        arOneWindHandler1[i]->Raw();
+		if (systemType == ArSc) {
+            if (i>0)
+                arOneWindHandler1[i]->Remove0BinsEvents();
+            if (i>1)
+                arOneWindHandler1[i]->RemoveBadRuns();
+			if (beamMomentum == 150) {
+                if (i>2)
+                    arOneWindHandler1[i]->AddRunNumberCut(0,20380);
+			}
+			if (beamMomentum == 13) {
+                if (i>2)
+                    arOneWindHandler1[i]->AddRunNumberCut(20551,30000);
+			}
+		}
+        arOneWindHandler1[i]->AddTrigger(T2);
+		if (systemType == ArSc) {
+            if (i>3)
+                arOneWindHandler1[i]->AddWFACut(-100, -200, 4);
+            if (i>4)
+                arOneWindHandler1[i]->AddWFAT4Cut(0,1000,25);
+		}
+        if (i>5)
+            arOneWindHandler1[i]->AddStrongPBDCut();
+        
+            arOneWindHandler1[i]->AddFittedVtxCut();
+        if (i>8)
+            arOneWindHandler1[i]->AddFitQualityCut();
+		if (systemType == ArSc){
+			if (beamMomentum == 150) {
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-589.7, -569.7);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(2800, e16Central);
+                if (i>11)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(800, 5000, e28Periferal);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3200,8100,2500,7000);
+                if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>15)
+                    arOneWindHandler1[i]->AddS5Cut(50);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.25,0,50);
+				//this->AddTrackVtxFittedTrackRatioCut(0.25);
+
+			}
+			if (beamMomentum == 75){
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-589.7, -569.7);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(1300, e16Central);
+                if (i>11)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(300, 1700, e28Periferal);
+                if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>15)
+                    arOneWindHandler1[i]->AddS5Cut(90);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3800,7200,3600,6800);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.17,0,30);
+
+			}
+			if (beamMomentum == 13){
+                if (i==11) continue;
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-590, -570);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(200, e16Central);
+                if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3000,7900,2500,6800);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.08,0,6);
+
+			}
+			if (beamMomentum == 19) {
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-589.9, -569.9);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(350, e16Central);
+                if (i>11)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(20, 500, e28Periferal);
+                if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>15)
+                    arOneWindHandler1[i]->AddS5Cut(90);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3500, 6500, 3200, 6000);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.1,0,10);
+			}
+			if (beamMomentum == 30) {
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-589.9, -569.9);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(600, e16Central);
+                if (i>11)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(100, 1000, e28Periferal);
+				if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>15)
+                    arOneWindHandler1[i]->AddS5Cut(90);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3400,7400,2800,6600);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.1,0,12);
+			}
+			if (beamMomentum == 40) {
+                if (i>9)
+                    arOneWindHandler1[i]->AddZVtxCut(-589.8, -569.8);
+                if (i>10)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(900, e16Central);
+                if (i>11)
+                    arOneWindHandler1[i]->AddPSDEnergyCut(200, 1000, e28Periferal);
+                if (i>14)
+                    arOneWindHandler1[i]->AddS5Cut(170);
+                if (i>15)
+                    arOneWindHandler1[i]->AddS5Cut(90);
+                if (i>6)
+                    arOneWindHandler1[i]->AddBPD3ClusterSignalCut(3500,8000,3000,7000);
+                if (i>12)
+                    arOneWindHandler1[i]->AddLocalRatioCut(0.13,0,15);
+			}
+		}
+        if (i>13)
+            arOneWindHandler1[i]->AddZeroPositiveTracksCut();
+
+		arOneWindHandler1[i]->AddStandardCutsRaw();
 		HandList->AddHandler(arOneWindHandler1[i]);
 	}
 
@@ -283,13 +402,12 @@ int main(int argc, char* argv[])
 		arLRCHandler[i] = new LRCHandler(name + "Raw.root", false);
 		arLRCHandler[i]->AddStandardCutsRaw();
 
-		arLRCHandler[i]->AddPSDCloudsCut();
 		arLRCHandler[i]->AddEtaForward(5.5, 6);
 		arLRCHandler[i]->AddEtaBackward(3.2 + i*0.2, 3.7 + i*0.2);
 		HandList->AddHandler(arLRCHandler[i]);
 	}
 
-	const int N8 = 1;
+	const int N8 = 0;
 	PSDHandler* arPSDHandler[N8];
 	for (int i = 0; i<N8; i++){
 		TString name;
@@ -298,11 +416,31 @@ int main(int argc, char* argv[])
 		sprintf(name2, "_%i", i);
 		name = nameBasic + name2;
 		arPSDHandler[i] = new PSDHandler(name + "Raw.root", false);
-//		arPSDHandler[i]->AddRunNumberCut(0,20380);
-	//	arPSDHandler[i]->AddPSDTimeStampCut(i+1);
 		arPSDHandler[i]->AddStandardCutsRaw();
+		arPSDHandler[i]->AddS5Cut(80);
+
+		if (i==1)
+			arPSDHandler[i]->Remove0EPSDEvents(e28Central);
+
 		HandList->AddHandler(arPSDHandler[i]);
 	}
+
+	const int N9 = 0;
+	PSD0BinsFindHandler* ar0bins[N9];
+	for (int i = 0; i<N9; i++){
+		TString name;
+		TString nameBasic = "0Bins";
+		char name2[50];
+		sprintf(name2, "_%i", i);
+		name = nameBasic + name2;
+		ar0bins[i] = new PSD0BinsFindHandler(name + "Raw.root", false);
+        ar0bins[i]->Raw();
+        if (i==1)
+            ar0bins[i]->AddFPGACut(eAll);
+ //       ar0bins[i]->Remove0BinsEvents();
+		HandList->AddHandler(ar0bins[i]);
+	}
+
 
 	//FIXME: add information about energy and system type inside names of hists!
 
@@ -353,22 +491,25 @@ int main(int argc, char* argv[])
 void BaseHandler::AddStandardCutsRaw()
 {
 	this->Raw();
-	this->AddTrigger(T2);
 	if (systemType == ArSc) {
+		this->Remove0BinsEvents();
+        this->RemoveBadRuns();
         if (beamMomentum == 150) {
             this->AddRunNumberCut(0,20380);
-            this->RemoveBadRuns();
+        }
+        if (beamMomentum == 13) {
+            this->AddRunNumberCut(20551,30000);
         }
     }
+	this->AddTrigger(T2);
 //	this->AddTrigger(T1);
 	if (systemType == ArSc) {
         this->AddWFACut(-100, -200, 4);
-		this->AddWFAT4Cut(0,700,25);
+		this->AddWFAT4Cut(0,1000,25);
     }
 	else 
 		this->AddWFACut(-100, -200, 1);
 //	this->AddChargeCut();
-	this->AddBPDCut();
 	this->AddFittedVtxCut();
 	this->AddFitQualityCut();
 	if (systemType == ArSc){
@@ -378,36 +519,39 @@ void BaseHandler::AddStandardCutsRaw()
 	 //   	this->AddDirectBPDCut(-10, 0.08, -10,10, BPD3);
 		//	this->AddDirectBPDCut(-10,-0.16,   -10,10, BPD1);
 	    //    this->AddBeamSlopeCut(-0.0002, -0.00014, ZY);*/
-			this->Remove0EPSDEvents(e28Central);
 			this->AddStrongPBDCut();
 			this->AddZVtxCut(-589.7, -569.7);
 			this->AddPSDEnergyCut(2800, e16Central);
 			this->AddPSDEnergyCut(800, 5000, e28Periferal);
-			this->AddS5Cut(100);
+		//	this->AddS5Cut(170);
 			this->AddBPD3ClusterSignalCut(3200,8100,2500,7000);
             this->AddLocalRatioCut(0.25,0,50);
             //this->AddTrackVtxFittedTrackRatioCut(0.25);
+            this->AddS5TracksCloudCut(80,280,6400,allTracks);
 
-		}
+
+        }
         if (beamMomentum == 75){
-			this->Remove0EPSDEvents(e28Central);
+			//this->Remove0EPSDEvents(e28Central);
 			this->AddStrongPBDCut();
-            this->AddZVtxCut(-589.7, -569.7);
-            this->AddPSDEnergyCut(1300, e16Central);
-            this->AddPSDEnergyCut(300, 1700, e28Periferal);
-            this->AddS5Cut(100);
+           this->AddZVtxCut(-589.7, -569.7);
+           this->AddPSDEnergyCut(1300, e16Central);
+           this->AddPSDEnergyCut(300, 1700, e28Periferal);
+ //          this->AddS5Cut(170);
             this->AddBPD3ClusterSignalCut(3800,7200,3600,6800);
-            this->AddLocalRatioCut(0.17,0,30);
+           this->AddLocalRatioCut(0.17,0,30);
+            this->AddS5TracksCloudCut(80,140,2040,nTrackInVtxFit);
+
 
         }
 		if (beamMomentum == 13){
             this->AddStrongPBDCut();
 			this->AddZVtxCut(-590, -570);
             this->AddPSDEnergyCut(200, e16Central);
-            //this->AddPSDEnergyCut(800, 5000, e28Periferal);
-            this->AddS5Cut(170);
+         //   this->AddS5Cut(170);
             this->AddBPD3ClusterSignalCut(3000,7900,2500,6800);
-            //this->AddLocalRatioCut(0.25,0,50);
+         	this->AddLocalRatioCut(0.08,0,6);
+            this->AddS5TracksCloudCut(80,100,200,nTrackInVtxFit);
 
         }
 		if (beamMomentum == 19) {
@@ -415,34 +559,38 @@ void BaseHandler::AddStandardCutsRaw()
             this->AddStrongPBDCut();
             this->AddPSDEnergyCut(350, e16Central);
             this->AddPSDEnergyCut(20, 500, e28Periferal);
-            //this->AddS5Cut(100);
+        //    this->AddS5Cut(170);
             this->AddBPD3ClusterSignalCut(3500, 6500, 3200, 6000);
             this->AddLocalRatioCut(0.1,0,10);
+            this->AddS5TracksCloudCut(80,55,475,nTrackInVtxFit);
         }
 		if (beamMomentum == 30) {
-			this->Remove0EPSDEvents(e28Central);
 			this->AddStrongPBDCut();
-            this->AddZVtxCut(-589.9, -569.9);
+         	this->AddZVtxCut(-589.9, -569.9);
 			this->AddPSDEnergyCut(600, e16Central);
 			this->AddPSDEnergyCut(100, 1000, e28Periferal);
-			//this->AddS5Cut(100);
+	//		this->AddS5Cut(170);
 			this->AddBPD3ClusterSignalCut(3400,7400,2800,6600);
-            this->AddLocalRatioCut(0.1,0,12);
-		}
+          	this->AddLocalRatioCut(0.1,0,12);
+            this->AddS5TracksCloudCut(80,85,790,nTrackInVtxFit);
+
+        }
 		if (beamMomentum == 40) {
-			this->Remove0EPSDEvents(e28Central);
 			this->AddStrongPBDCut();
             this->AddZVtxCut(-589.8, -569.8);
-            //this->AddZVtxCut(-581.5, -578);
-            this->AddPSDEnergyCut(900, e16Central);
-            this->AddPSDEnergyCut(200, 1000, e28Periferal);
-            this->AddS5Cut(100);
+            this->AddZVtxCut(-581.5, -578);
+           	this->AddPSDEnergyCut(900, e16Central);
+           	this->AddPSDEnergyCut(200, 1000, e28Periferal);
+          // 	this->AddS5Cut(170);
             this->AddBPD3ClusterSignalCut(3500,8000,3000,7000);
-            this->AddLocalRatioCut(0.13,0,15);
+           	this->AddLocalRatioCut(0.13,0,15);
+            this->AddS5TracksCloudCut(80,120,1200,nTrackInVtxFit);
         }
 	}
-	else
-		this->AddZVtxCut(-590.3, -570.3);
+	else {
+        this->AddBPDCut();
+        this->AddZVtxCut(-590.3, -570.3);
+    }
     this->AddZeroPositiveTracksCut();
 
 //	this->AddPSDCloudsCut(garbageLowPSDLowN);
@@ -456,12 +604,15 @@ void BaseHandler::AddStandardCutsRaw()
 	else
 		this->AddVTPCAndGTPCCut(15, 50);
 
+
 	this->AddTotalTPCCut(30);
+
 	this->AddImpactPointCut(4, 2);
+
 	this->AddPtCut(0, 1.5);
-	if (beamMomentum != 13){
-		this->AddAcceptRapidityCut();
-		if (systemType != ArSc)
+    if (beamMomentum != 13){
+		this->AddAcceptRapidityCut(0.9);
+//		if (systemType != ArSc)
 			this->AddEECut();
 	}
 }
@@ -479,7 +630,7 @@ void BaseHandler::AddStandardCutsRec()
 	this->AddTotalTPCCut(30);
 	this->AddImpactPointCut(4, 2);
 	this->AddPtCut(0, 1.5);
-	this->AddAcceptRapidityCut();
+	this->AddAcceptRapidityCut(0.9);
 	this->AddEECut();
 }
 
@@ -488,5 +639,5 @@ void BaseHandler::AddStandardCutsSim()
 	this->Simulation();
 	this->AddChargeTrkCut(0);
 	this->AddPtCut(0, 1.5);
-	this->AddAcceptRapidityCut();
+	this->AddAcceptRapidityCut(0.9);
 }

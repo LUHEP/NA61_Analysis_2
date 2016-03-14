@@ -56,7 +56,8 @@ using namespace fwk;
 
 // type of data 
 //const bool realData = true;
-const int beamMomentum = 13;
+
+const int beamMomentum = 150;
 const double dBeamMomentum = beamMomentum; //we stil need the double and the int varialbes
 const double pMass = 0.938; 
 const double beamRapidity = 0.5*log((sqrt(pow(pMass, 2) + dBeamMomentum*dBeamMomentum) + dBeamMomentum) /
@@ -69,6 +70,9 @@ enum eBeamSlopePlane{ZX,ZY};
 enum eTrigger{T1, T2};
 enum eMyS{S1,S2,S5};
 enum eMyCoordinate{X,Y,Z};
+enum eMultiplicityType{allTracks, nTrackInVtxFit};
+enum eAcceptanceType{NA61, NA49, NA49M, NA49NLarge, NA49NSmall};
+
 
 // Change it to your path
 const TString configPath = "/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetIN";
@@ -79,7 +83,7 @@ const string str_configPath ="/afs/cern.ch/work/a/aseryako/Runs_BeBe_158_TargetI
 // --- PSD consts
 const Int_t nPSDModules = 44;
 const Int_t nPSDSections = 10;
-const Int_t nPSDMods = 28; 
+const Int_t nPSDMods = 28;
 const double_t class1Min = 0; 
 const double_t class2Min = 584.135;
 const double_t class3Min = 657.519;
@@ -146,23 +150,23 @@ const double arXmaxPSDFluc[nBinsPSDFluc] = { 300.5, 1.5, 6500, 29.5 };
 
 // --- const for PSDHanler
 // iModule PSD energy
-const int nBinsPSDModules = nPSDModules + 1;
+const int nBinsPSDModules = nPSDModules + 2;
 const int arNBinsPSDModules[nBinsPSDModules] = {751,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
 												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,
-												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000};
+												1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,500};
 
 const double arXminPSDModules[nBinsPSDModules] = {-0.5,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
 												  -10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,-10,
-												  -10,-10,-10};
+												  -10,-10,-10, 0};
 const double arXmaxPSDModulesArSc150[nBinsPSDModules] = {750.5,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
 														 2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
 														 2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
-														 2000,2000,2000};
+														 2000,2000,2000,500};
 const double arXmaxPSDModulesBeBe150[nBinsPSDModules] = {40.5,600,600,600,600,600,600,600,600,600,600,600,600,600,
 												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
 												  600,600,600,600,600,600,600,600,600,600,600,600,600,600,
-												  600,600,600};
+												  600,600,600, 500};
 
 
 
@@ -203,24 +207,7 @@ const double electronCut40_x[10] = { -0.703944, -0.226909, 0.0911135, 1.02247, 1
 const double electronCut40_y[10] = { 1.36965, 1.31561, 1.34886, 1.48188, 1.61905, 1.68556, 1.88509, 1.84352, 1.63568, 1.36965 };
 TCutG electronCut40("electronCut40", 10, electronCut40_x, electronCut40_y);*/
 
-//for 0Energy in PSD cut
-const int nRunsWith0EnergyInOnePSDModule = 14;
-const int arRunsWith0EnergyInOnePSDModule[nRunsWith0EnergyInOnePSDModule] [2]= { //[iRun][iModule]
-		{20451, 6},
-		{20413, 8},
-		{20455, 8},
-		{20459, 8},
-		{20337, 11},
-		{20365, 11},
-		{20432, 11},
-		{20458, 11},
-		{20360, 29},
-		{20362, 29},
-		{20363, 29},
-		{20364, 29},
-		{20365, 29},
-		{20457, 44}
-};
+
 
 //Bad runs
 // -- ArSc
@@ -242,20 +229,53 @@ const double S5Z = 1000;
 // Hists & Handlers
 // -- One Wind Handler
 // --- tracks
-const bool bOneWindHandlerMomentum1d = false;
-const bool bBeamPositionSvsSignal = false;
+const bool bOneWindHandlerMomentum1d = true;
+const bool bBeamPositionSvsSignal = true;
 // --- events
 
-// Triggers
-const bool bT1=true;
+// Triggers (not realy)
+const bool bT1=false; // not loop over tracks
 
 
 
+//for 0Energy in PSD cut
+const int nRunsWith0EnergyInOnePSDModule13 = 1;
+const int arRunsWith0EnergyInOnePSDModule13[nRunsWith0EnergyInOnePSDModule13*3]= { //[iRun][iEvent]
+		20576, 10300, 26100
+};
 
-
-
-
-
+const int nRunsWith0EnergyInOnePSDModule150 = 24;
+const int arRunsWith0EnergyInOnePSDModule150[nRunsWith0EnergyInOnePSDModule150*3]= { //[iRun][iEvent]
+		20458,	300,	2500,
+		20477,	29600,	31300,
+		20480,	40000,	41600,
+		20480,	53300,	54000,
+		20413,	44700,	53600,
+		20455,	26600,	47300,
+		20459,	23000,	42000,
+		20480,	36400,	41600,
+		20337,	21000,	49500,
+		20432,	58600,	61400,
+		20458,	21200,	31300,
+		20459,	18000,	42000,
+		20360,	72000,	110000,
+		20362,	0,		16000,
+		20363,	0,		52000,
+		20364,	0,		52000,
+		20365,	0,		9000,
+		20457,	53500,	110000,
+		20458,	0,		2500,
+        20366,  50900,  54000,
+        20477,  26000,  30000,
+		20451,	0,		8000,
+		20428,	0,		7000,
+		20429,	0,		7000
+};
+const int nRunsWith0EnergyInOnePSDModule75 = 2;
+const int arRunsWith0EnergyInOnePSDModule75[nRunsWith0EnergyInOnePSDModule75*3]= { //[iRun][iEvent]
+        21465,	12300, 19200,
+        21563,  42800, 43600
+};
 
 
 
