@@ -620,6 +620,10 @@ CentralityCut::CentralityCut(int minPer, int maxPer, bool bRaw):
                         myPSDModuleSet = e16Central;
                         for (int i = 1; i < 17; i++)
                             myPSDModArray[i] = 1;
+                        myPSDModArray[22] = 1;
+                        myPSDModArray[21] = 1;
+                        myPSDModArray[28] = 1;
+                        myPSDModArray[27] = 1;
 
                         switch (myLowPer){
                             case 0:
